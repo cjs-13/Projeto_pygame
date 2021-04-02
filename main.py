@@ -157,8 +157,3 @@ def menu_principal():
                 timer = 0
             if indice > 4:
                 main()
-                inicio = False
-
-        pygame.display.flip()
-
-menu_principal()
