@@ -1,26 +1,29 @@
 import pygame
 import os
-#from sys import exit
+from sys import exit
 
 LARGURA = 750
 ALTURA = 750
 FPS = 60
 BRANCO = (255, 255, 255)
+RELOGIO = pygame.time.Clock()
 
 pygame.init()
 
 # Carregando imagens
-ICONE = pygame.transform.rotate(pygame.image.load(os.path.join("assets", "space_ship.png")), 45)
+ICONE = pygame.image.load(os.path.join("assets", "space_ship.png"))
 NAVE_PRINCIPAL = pygame.transform.scale(pygame.image.load(os.path.join("assets", "space_ship.png")), (100, 90))
 LASERS_PRINCIPAL = pygame.image.load(os.path.join("assets", "laser_principal.png"))
 BG = pygame.transform.scale(pygame.image.load(os.path.join("assets", "BG (4).png")), (LARGURA, ALTURA))
+BG_menu = list()
+for i in range(1, 6):
+    BG_menu.append(pygame.transform.scale(pygame.image.load(os.path.join("assets", f"BG_menu ({i}).png")), (LARGURA, ALTURA)))
 
 tela = pygame.display.set_mode((LARGURA, ALTURA))
 pygame.display.set_caption("Space Shooter")
 pygame.display.set_icon(ICONE)
 
 # Classes
-
 class Laser:
     def __init__(self, x, y, img, nave):
         self.x = x
@@ -99,19 +102,20 @@ def testa_colisao(obj1, obj2):
 
 def main():
     jogando = True
-    relogio = pygame.time.Clock()
     jogador_vel = 5
     lasers_vel = 5
     jogador = Jogador(300, 650)
     inimigos = list()
     while jogando:
-        relogio.tick(FPS)
+        RELOGIO.tick(FPS)
         tela.blit(BG, (0, 0))
         jogador.draw(tela)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 jogando = False
+                pygame.quit()
+                exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     jogador.atirar(jogador)
@@ -130,4 +134,31 @@ def main():
 
         pygame.display.flip()
 
-main()
+def menu_principal():
+    inicio = False
+    timer = 0
+    indice = 0
+    while True:
+        RELOGIO.tick(FPS)
+        tela.blit(BG_menu[indice], (0, 0))
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if event.type == pygame.KEYDOWN:
+                inicio = True
+
+        if inicio:
+            if timer < 10:
+                timer += 1
+            else:
+                indice += 1
+                timer = 0
+            if indice > 4:
+                main()
+                inicio = False
+
+        pygame.display.flip()
+
+menu_principal()
