@@ -14,6 +14,7 @@ pygame.init()
 ICONE = pygame.image.load(os.path.join("assets", "space_ship.png"))
 NAVE_PRINCIPAL = pygame.transform.scale(pygame.image.load(os.path.join("assets", "space_ship.png")), (100, 90))
 LASERS_PRINCIPAL = pygame.image.load(os.path.join("assets", "laser_principal.png"))
+LOGO = pygame.transform.scale(pygame.image.load(os.path.join("assets", "titulo.png")), (400, 400))
 BG = pygame.transform.scale(pygame.image.load(os.path.join("assets", "BG.png")), (LARGURA, ALTURA))
 BG_menu = list()
 for i in range(1, 6):
@@ -141,6 +142,7 @@ def menu_principal():
     while True:
         RELOGIO.tick(FPS)
         tela.blit(BG_menu[indice], (0, 0))
+        tela.blit(LOGO, (180, 100))
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
