@@ -14,7 +14,7 @@ pygame.init()
 ICONE = pygame.image.load(os.path.join("assets", "space_ship.png"))
 NAVE_PRINCIPAL = pygame.transform.scale(pygame.image.load(os.path.join("assets", "space_ship.png")), (100, 90))
 LASERS_PRINCIPAL = pygame.image.load(os.path.join("assets", "laser_principal.png"))
-BG = pygame.transform.scale(pygame.image.load(os.path.join("assets", "BG (4).png")), (LARGURA, ALTURA))
+BG = pygame.transform.scale(pygame.image.load(os.path.join("assets", "BG.png")), (LARGURA, ALTURA))
 BG_menu = list()
 for i in range(1, 6):
     BG_menu.append(pygame.transform.scale(pygame.image.load(os.path.join("assets", f"BG_menu ({i}).png")), (LARGURA, ALTURA)))
@@ -157,3 +157,6 @@ def menu_principal():
                 timer = 0
             if indice > 4:
                 main()
+        pygame.display.flip()
+
+menu_principal()
