@@ -1,4 +1,5 @@
 import pygame
+import random
 import os
 from sys import exit
 
@@ -126,7 +127,7 @@ class Inimigo(Nave):
         self.laser_img = LASER_RED
         self.mascara = pygame.mask.from_surface(self.nave_img)
         self.tipo = "Inimigo"
-
+        self.firerate = 45
     def mover_laser(self, vel, obj):
         for laser in self.lasers:
             laser.mover(vel)
@@ -149,7 +150,7 @@ def main():
     jogador_vel = 5
     lasers_vel = 7
     jogador = Jogador(300, ALTURA - 100)
-    inimigo = Inimigo(100, 100)
+    inimigo = Inimigo(random.randint(0,LARGURA),random.randint(0,ALTURA))
     inimigos = list()
     inimigos.append(inimigo)
     while jogando:
@@ -169,6 +170,11 @@ def main():
                     jogando = False
                     pygame.quit()
                     exit()
+                if event.key == pygame.K_u:
+                    inimigo = Inimigo(random.randint(0, LARGURA - inimigo.largura()), random.randint(0, ALTURA - inimigo.altura()))
+                    inimigo.firerate = random.randint(1,60)
+                    inimigos.append(inimigo)
+
                 if event.key == pygame.K_l:
                     jogador.firerateup()
 
