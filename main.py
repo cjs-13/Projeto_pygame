@@ -68,7 +68,7 @@ class Nave():
         self.lasers = list()
         self.firerate = 15
         self.cool_down_counter = self.firerate
-        self.scattershot = False
+        self.piercing = False
 
     def draw(self, tela):
         tela.blit(self.nave_img, (self.x, self.y))
@@ -89,11 +89,11 @@ class Nave():
     def fireratedown(self):
         self.firerate += 1
 
-    def scattershotttogle(self):
-        if self.scattershot == True:
-            self.scattershot = False
+    def piercingtoggle(self):
+        if self.piercing == True:
+            self.piercing = False
         else:
-            self.scattershot = True
+            self.piercing = True
 
     def largura(self):
         return self.nave_img.get_width()
@@ -117,8 +117,9 @@ class Jogador(Nave):
             else:
                 for obj in objs:
                     if laser.colisao(obj, True):
-                        #objs.remove(obj)
-                        self.lasers.remove(laser)
+                        # objs.remove(obj)
+                        if self.piercing:
+                            self.lasers.remove(laser)
 
 class Inimigo(Nave):
     def __init__(self, x, y):
@@ -150,7 +151,7 @@ def main():
     jogador_vel = 5
     lasers_vel = 7
     jogador = Jogador(300, ALTURA - 100)
-    inimigo = Inimigo(random.randint(0,LARGURA),random.randint(0,ALTURA))
+    inimigo = Inimigo(random.randint(0,100),random.randint(0,100))
     inimigos = list()
     inimigos.append(inimigo)
     while jogando:
@@ -171,7 +172,7 @@ def main():
                     pygame.quit()
                     exit()
                 if event.key == pygame.K_u:
-                    inimigo = Inimigo(random.randint(0, LARGURA - inimigo.largura()), random.randint(0, ALTURA - inimigo.altura()))
+                    inimigo = Inimigo(random.randint(0, LARGURA - inimigo.largura()), random.randint(0, ALTURA - inimigo.altura() - 100))
                     inimigo.firerate = random.randint(1,60)
                     inimigos.append(inimigo)
 
@@ -182,7 +183,7 @@ def main():
                     jogador.fireratedown()
 
                 if event.key == pygame.K_i:
-                     jogador.scattershotttogle()
+                     jogador.piercingtoggle()
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_a] and jogador.x - jogador_vel > 0:
