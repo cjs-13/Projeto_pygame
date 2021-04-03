@@ -123,8 +123,10 @@ def main():
                 pygame.quit()
                 exit()
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    jogador.atirar(jogador)
+                if event.key == pygame.K_ESCAPE:
+                    jogando = False
+                    pygame.quit()
+                    exit()
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_a] and jogador.x - jogador_vel > 0:
