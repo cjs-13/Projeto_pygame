@@ -20,10 +20,10 @@ for i in range(1, 4):
     NAVES_INIMIGAS.append(pygame.image.load(os.path.join("assets", f"enemy_ship ({i}).png")).convert_alpha())
 LASER_RED = pygame.image.load(os.path.join("assets", "laser_red.png")).convert_alpha()
 LASER_BLUE = pygame.image.load(os.path.join("assets", "laser_blue.png")).convert_alpha()
-BG = pygame.transform.scale(pygame.image.load(os.path.join("assets", "BG.png")), (LARGURA, ALTURA))
+BG = pygame.transform.scale(pygame.image.load(os.path.join("assets", "BG.png")).convert(), (LARGURA, ALTURA))
 BG_MENU = list()
 for i in range(1, 6):
-    BG_MENU.append(pygame.transform.scale(pygame.image.load(os.path.join("assets", f"BG_menu ({i}).png")), (LARGURA, ALTURA)))
+    BG_MENU.append(pygame.transform.scale(pygame.image.load(os.path.join("assets", f"BG_menu ({i}).png")).convert(), (LARGURA, ALTURA)))
 ICONE = pygame.image.load(os.path.join("assets", "space_ship.png"))
 LOGO = pygame.transform.scale(pygame.image.load(os.path.join("assets", "titulo.png")), (400, 400))
 
@@ -40,7 +40,7 @@ class Laser():
         self.nave = nave
 
     def draw(self, tela):
-        tela.blit(self.img, (self.x + self.nave.largura()//2 - 5, self.y))
+        tela.blit(self.img, (self.x + self.nave.largura()//2 - (self.img.get_width()//2), self.y))
 
     def mover(self, vel):
         self.y += vel
@@ -48,8 +48,8 @@ class Laser():
     def fora_tela(self, altura):
         return self.y <= 0 or self.y >= altura
 
-    def colisao(self, obj):
-        return testa_colisao(self, obj)
+    def colisao(self, obj, validar):
+        return testa_colisao(self, obj, validar)
 
     def largura(self):
         return self.img.get_width()
@@ -63,6 +63,7 @@ class Nave():
         self.y = y
         self.nave_img = None
         self.laser_img = None
+        self.tipo = None
         self.lasers = list()
         self.firerate = 15
         self.cool_down_counter = self.firerate
@@ -84,8 +85,6 @@ class Nave():
     def firerateup(self):
         if self.firerate >= 2:
             self.firerate -= 1
-
-
     def fireratedown(self):
         self.firerate += 1
 
@@ -95,20 +94,11 @@ class Nave():
         else:
             self.scattershot = True
 
-    def mover_laser(self, vel, obj):
-        for laser in self.lasers:
-            laser.move(vel)
-            if laser.fora_tela(ALTURA):
-                self.lasers.remove(laser)
-            elif laser.colisao(obj):
-                self.lasers.remove(laser)
-
     def largura(self):
         return self.nave_img.get_width()
 
     def altura(self):
         return self.nave_img.get_height()
-
 
 class Jogador(Nave):
     def __init__(self, x, y):
@@ -116,6 +106,7 @@ class Jogador(Nave):
         self.nave_img = NAVE_PRINCIPAL
         self.laser_img = LASER_PRINCIPAL
         self.mascara = pygame.mask.from_surface(self.nave_img)
+        self.tipo = "Jogador"
 
     def mover_laser(self, vel, objs):
         for laser in self.lasers:
@@ -124,8 +115,8 @@ class Jogador(Nave):
                 self.lasers.remove(laser)
             else:
                 for obj in objs:
-                    if laser.colisao(obj):
-                        objs.remove(obj)
+                    if laser.colisao(obj, True):
+                        #objs.remove(obj)
                         self.lasers.remove(laser)
 
 class Inimigo(Nave):
@@ -134,10 +125,23 @@ class Inimigo(Nave):
         self.nave_img = NAVES_INIMIGAS[2]
         self.laser_img = LASER_RED
         self.mascara = pygame.mask.from_surface(self.nave_img)
+        self.tipo = "Inimigo"
 
-def testa_colisao(obj1, obj2):
-    diff_x = obj2.x - obj1.x - (obj2.largura()//2) + ((obj1.largura() * 3)//2)
-    diff_y = obj2.y - obj1.y
+    def mover_laser(self, vel, obj):
+        for laser in self.lasers:
+            laser.mover(vel)
+            if laser.fora_tela(ALTURA):
+                self.lasers.remove(laser)
+            elif laser.colisao(obj, False):
+                self.lasers.remove(laser)
+
+def testa_colisao(obj1, obj2, validar):
+    if validar:
+        diff_x = obj2.x - obj1.x - (obj2.largura()//2) + ((obj1.largura() * 3)//2)
+        diff_y = obj2.y - obj1.y
+    else:
+        diff_x = obj2.x - obj1.x - (obj2.largura()//2) - (obj1.largura()//2)
+        diff_y = obj2.y - obj1.y
     return obj1.mascara.overlap(obj2.mascara, (diff_x, diff_y)) != None
 
 def main():
@@ -152,6 +156,7 @@ def main():
         RELOGIO.tick(FPS)
         TELA.blit(BG, (0, 0))
         jogador.draw(TELA)
+
         for nave in inimigos:
             nave.draw(TELA)
         for event in pygame.event.get():
@@ -186,7 +191,9 @@ def main():
             jogador.atirar(jogador)
 
         jogador.mover_laser(-lasers_vel, inimigos)
-
+        for nave in inimigos:
+            nave.atirar(nave)
+            nave.mover_laser(lasers_vel, jogador)
         pygame.display.flip()
 
 def menu_principal():
