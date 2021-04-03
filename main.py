@@ -3,10 +3,11 @@ import os
 from sys import exit
 
 LARGURA = 750
-ALTURA = 750
+ALTURA = 500
 FPS = 60
 BRANCO = (255, 255, 255)
 RELOGIO = pygame.time.Clock()
+FIRERATE = 15
 
 pygame.init()
 
@@ -34,7 +35,7 @@ class Laser:
         self.nave = nave
 
     def draw(self, tela):
-        tela.blit(self.img, (self.x + self.nave.largura()/2 - 5, self.y))
+        tela.blit(self.img, (self.x + self.nave.largura()//2 - 5, self.y))
 
     def mover(self, vel):
         self.y += vel
@@ -52,7 +53,8 @@ class Nave:
         self.nave_img = None
         self.laser_img = None
         self.lasers = list()
-        self.cool_down_counter = 0
+        self.cool_down_counter = FIRERATE
+
 
     def draw(self, tela):
         tela.blit(self.nave_img, (self.x, self.y))
@@ -60,9 +62,11 @@ class Nave:
             laser.draw(tela)
 
     def atirar(self, nave):
-        laser = Laser(self.x, self.y, self.laser_img, nave)
-        self.lasers.append(laser)
-
+        if self.cool_down_counter == 0:
+            self.cool_down_counter = FIRERATE
+            laser = Laser(self.x, self.y, self.laser_img, nave)
+            self.lasers.append(laser)
+        self.cool_down_counter -= 1
     def mover_laser(self, vel, obj):
         for laser in self.lasers:
             laser.move(vel)
@@ -85,6 +89,7 @@ class Jogador(Nave):
         self.laser_img = LASERS_PRINCIPAL
         self.mascara = pygame.mask.from_surface(self.nave_img)
 
+
     def mover_laser(self, vel, objs):
         for laser in self.lasers:
             laser.mover(vel)
@@ -105,7 +110,7 @@ def main():
     jogando = True
     jogador_vel = 5
     lasers_vel = 5
-    jogador = Jogador(300, 650)
+    jogador = Jogador(300, ALTURA - 100)
     inimigos = list()
     while jogando:
         RELOGIO.tick(FPS)
@@ -130,6 +135,8 @@ def main():
             jogador.y -= jogador_vel
         if keys[pygame.K_s] and jogador.y + jogador_vel + jogador.altura() < ALTURA:
             jogador.y += jogador_vel
+        if keys[pygame.K_SPACE]:
+            jogador.atirar(jogador)
 
         jogador.mover_laser(-lasers_vel, inimigos)
 
