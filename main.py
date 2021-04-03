@@ -7,7 +7,7 @@ ALTURA = 500
 FPS = 60
 BRANCO = (255, 255, 255)
 RELOGIO = pygame.time.Clock()
-FIRERATE = 15
+
 
 pygame.init()
 
@@ -53,7 +53,9 @@ class Nave:
         self.nave_img = None
         self.laser_img = None
         self.lasers = list()
-        self.cool_down_counter = FIRERATE
+        self.firerate = 15
+        self.cool_down_counter = self.firerate
+        self.scattershot = False
 
 
     def draw(self, tela):
@@ -63,10 +65,25 @@ class Nave:
 
     def atirar(self, nave):
         if self.cool_down_counter == 0:
-            self.cool_down_counter = FIRERATE
+            self.cool_down_counter = self.firerate
             laser = Laser(self.x, self.y, self.laser_img, nave)
             self.lasers.append(laser)
+
         self.cool_down_counter -= 1
+
+    def firerateup(self):
+        if self.firerate >= 2:
+            self.firerate -= 1
+
+
+    def fireratedown(self):
+        self.firerate += 1
+
+    def scattershotttogle(self):
+        if self.scattershot == True:
+            self.scattershot = False
+        else:
+            self.scattershot = True
     def mover_laser(self, vel, obj):
         for laser in self.lasers:
             laser.move(vel)
@@ -127,6 +144,15 @@ def main():
                     jogando = False
                     pygame.quit()
                     exit()
+                if event.key == pygame.K_l:
+                    jogador.firerateup()
+
+                if event.key == pygame.K_k:
+                    jogador.fireratedown()
+
+                if event.key == pygame.K_i:
+                     jogador.scattershotttogle()
+
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_a] and jogador.x - jogador_vel > 0:
