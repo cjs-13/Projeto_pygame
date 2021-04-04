@@ -18,7 +18,7 @@ NAVE_PRINCIPAL = pygame.transform.scale(pygame.image.load(os.path.join("assets",
 LASER_PRINCIPAL = pygame.image.load(os.path.join("assets", "laser_principal.png")).convert_alpha()
 NAVES_INIMIGAS = list()
 for i in range(1, 4):
-    NAVES_INIMIGAS.append(pygame.image.load(os.path.join("assets", f"enemy_ship ({i}).png")).convert_alpha())
+    NAVES_INIMIGAS.append(pygame.transform.scale(pygame.image.load(os.path.join("assets", f"enemy_ship ({i}).png")).convert_alpha(), (100, 90)))
 LASER_RED = pygame.image.load(os.path.join("assets", "laser_red.png")).convert_alpha()
 LASER_BLUE = pygame.image.load(os.path.join("assets", "laser_blue.png")).convert_alpha()
 BG = pygame.transform.scale(pygame.image.load(os.path.join("assets", "BG.png")).convert(), (LARGURA, ALTURA))
@@ -41,7 +41,10 @@ class Laser():
         self.nave = nave
 
     def draw(self, tela):
-        tela.blit(self.img, (self.x + self.nave.largura()//2 - (self.img.get_width()//2), self.y))
+        if self.nave.tipo == "Jogador":
+            tela.blit(self.img, (self.x + (self.nave.largura()//2) - (self.img.get_width()//2), self.y))
+        elif self.nave.tipo == "Inimigo":
+            tela.blit(self.img, (self.x + (self.nave.largura()//2) - (self.img.get_width() // 2), self.y + self.nave.altura() - self.img.get_height()))
 
     def mover(self, vel):
         self.y += vel
@@ -49,8 +52,8 @@ class Laser():
     def fora_tela(self, altura):
         return self.y <= 0 or self.y >= altura
 
-    def colisao(self, obj, validar):
-        return testa_colisao(self, obj, validar)
+    def colisao(self, obj):
+        return testa_colisao(self, obj)
 
     def largura(self):
         return self.img.get_width()
@@ -116,44 +119,50 @@ class Jogador(Nave):
                 self.lasers.remove(laser)
             else:
                 for obj in objs:
-                    if laser.colisao(obj, True):
-                        # objs.remove(obj)
+                    if laser.colisao(obj):
+                        objs.remove(obj)
                         if self.piercing:
                             self.lasers.remove(laser)
 
 class Inimigo(Nave):
-    def __init__(self, x, y):
+    def __init__(self, x, y, indice):
         super().__init__(x, y)
-        self.nave_img = NAVES_INIMIGAS[2]
+        self.nave_img = NAVES_INIMIGAS[indice]
         self.laser_img = LASER_RED
         self.mascara = pygame.mask.from_surface(self.nave_img)
         self.tipo = "Inimigo"
         self.firerate = 45
+
     def mover_laser(self, vel, obj):
         for laser in self.lasers:
             laser.mover(vel)
             if laser.fora_tela(ALTURA):
                 self.lasers.remove(laser)
-            elif laser.colisao(obj, False):
+            elif laser.colisao(obj):
                 self.lasers.remove(laser)
 
-def testa_colisao(obj1, obj2, validar):
-    if validar:
-        diff_x = obj2.x - obj1.x - (obj2.largura()//2) + ((obj1.largura() * 3)//2)
-        diff_y = obj2.y - obj1.y
-    else:
-        diff_x = obj2.x - obj1.x - (obj2.largura()//2) - (obj1.largura()//2)
-        diff_y = obj2.y - obj1.y
+    def fora_tela(self, altura):
+        return self.y >= altura
+
+    def mover_nave(self, vel, nave, inimigos):
+        self.y += vel
+        if self.fora_tela(ALTURA):
+            inimigos.remove(nave)
+
+def testa_colisao(obj1, obj2):
+    diff_x = obj2.x - obj1.x - (obj2.largura()//2) + (obj1.largura()//2)
+    diff_y = obj2.y - obj1.y
+    if obj2.tipo == "Jogador":
+        diff_y = diff_y - obj2.altura() + obj1.altura()
     return obj1.mascara.overlap(obj2.mascara, (diff_x, diff_y)) != None
 
 def main():
     jogando = True
     jogador_vel = 5
     lasers_vel = 7
+    inimigos_vel = 1
     jogador = Jogador(300, ALTURA - 100)
-    inimigo = Inimigo(random.randint(0,100),random.randint(0,100))
     inimigos = list()
-    inimigos.append(inimigo)
     while jogando:
         RELOGIO.tick(FPS)
         TELA.blit(BG, (0, 0))
@@ -172,8 +181,8 @@ def main():
                     pygame.quit()
                     exit()
                 if event.key == pygame.K_u:
-                    inimigo = Inimigo(random.randint(0, LARGURA - inimigo.largura()), random.randint(0, ALTURA - inimigo.altura() - 100))
-                    inimigo.firerate = random.randint(1,60)
+                    inimigo = Inimigo(random.randint(100, 500), 0, random.randint(0, 2))
+                    inimigo.firerate = random.randint(30, 60)
                     inimigos.append(inimigo)
 
                 if event.key == pygame.K_l:
@@ -201,6 +210,8 @@ def main():
         for nave in inimigos:
             nave.atirar(nave)
             nave.mover_laser(lasers_vel, jogador)
+            nave.mover_nave(inimigos_vel, nave, inimigos)
+        print(len(inimigos))
         pygame.display.flip()
 
 def menu_principal():
