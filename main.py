@@ -4,21 +4,23 @@ import os
 from sys import exit
 
 LARGURA = 750
-ALTURA = 500
+ALTURA = 750
 FPS = 60
 BRANCO = (255, 255, 255)
 RELOGIO = pygame.time.Clock()
-
+UP_SCALE_TITULO = 3
+UP_SCALE_MENU = 2
+SCALE_NAVE = (100, 90)
 
 pygame.init()
 TELA = pygame.display.set_mode((LARGURA, ALTURA))
 
 # Carregando imagens
-NAVE_PRINCIPAL = pygame.transform.scale(pygame.image.load(os.path.join("assets", "space_ship.png")).convert_alpha(), (100, 90))
+NAVE_PRINCIPAL = pygame.transform.scale(pygame.image.load(os.path.join("assets", "space_ship.png")).convert_alpha(), SCALE_NAVE)
 LASER_PRINCIPAL = pygame.image.load(os.path.join("assets", "laser_principal.png")).convert_alpha()
 NAVES_INIMIGAS = list()
 for i in range(1, 4):
-    NAVES_INIMIGAS.append(pygame.transform.scale(pygame.image.load(os.path.join("assets", f"enemy_ship ({i}).png")).convert_alpha(), (100, 90)))
+    NAVES_INIMIGAS.append(pygame.transform.scale(pygame.image.load(os.path.join("assets", f"enemy_ship ({i}).png")).convert_alpha(), SCALE_NAVE))
 LASER_RED = pygame.image.load(os.path.join("assets", "laser_red.png")).convert_alpha()
 LASER_BLUE = pygame.image.load(os.path.join("assets", "laser_blue.png")).convert_alpha()
 BG = pygame.transform.scale(pygame.image.load(os.path.join("assets", "BG.png")).convert(), (LARGURA, ALTURA))
@@ -26,7 +28,8 @@ BG_MENU = list()
 for i in range(1, 6):
     BG_MENU.append(pygame.transform.scale(pygame.image.load(os.path.join("assets", f"BG_menu ({i}).png")).convert(), (LARGURA, ALTURA)))
 ICONE = pygame.image.load(os.path.join("assets", "space_ship.png"))
-LOGO = pygame.transform.scale(pygame.image.load(os.path.join("assets", "titulo.png")), (400, 400))
+LOGO = pygame.transform.scale(pygame.image.load(os.path.join("assets", "titulo.png")), (138 * UP_SCALE_TITULO, 46 * UP_SCALE_TITULO))
+START = pygame.transform.scale(pygame.image.load(os.path.join("assets", "start.png")), (146 * UP_SCALE_MENU, 23 * UP_SCALE_MENU))
 
 pygame.display.set_caption("Space Shooter")
 pygame.display.set_icon(ICONE)
@@ -44,7 +47,7 @@ class Laser():
         if self.nave.tipo == "Jogador":
             tela.blit(self.img, (self.x + (self.nave.largura()//2) - (self.img.get_width()//2), self.y))
         elif self.nave.tipo == "Inimigo":
-            tela.blit(self.img, (self.x + (self.nave.largura()//2) - (self.img.get_width() // 2), self.y + self.nave.altura() - self.img.get_height()))
+            tela.blit(self.img, (self.x + (self.nave.largura()//2) - (self.img.get_width()//2), self.y + self.nave.altura() - self.img.get_height()))
 
     def mover(self, vel):
         self.y += vel
@@ -83,12 +86,12 @@ class Nave():
             self.cool_down_counter = self.firerate
             laser = Laser(self.x, self.y, self.laser_img, nave)
             self.lasers.append(laser)
-
         self.cool_down_counter -= 1
 
     def firerateup(self):
         if self.firerate >= 2:
             self.firerate -= 1
+
     def fireratedown(self):
         self.firerate += 1
 
@@ -150,10 +153,10 @@ class Inimigo(Nave):
             inimigos.remove(nave)
 
 def testa_colisao(obj1, obj2):
-    diff_x = obj2.x - obj1.x - (obj2.largura()//2) + (obj1.largura()//2)
-    diff_y = obj2.y - obj1.y
+    diff_x = int(obj2.x - obj1.x - (obj2.largura()//2) + (obj1.largura()//2))
+    diff_y = int(obj2.y - obj1.y)
     if obj2.tipo == "Jogador":
-        diff_y = diff_y - obj2.altura() + obj1.altura()
+        diff_y = int(diff_y - obj2.altura() + obj1.altura())
     return obj1.mascara.overlap(obj2.mascara, (diff_x, diff_y)) != None
 
 def main():
@@ -161,13 +164,12 @@ def main():
     jogador_vel = 5
     lasers_vel = 7
     inimigos_vel = 1
-    jogador = Jogador(300, ALTURA - 100)
+    jogador = Jogador(LARGURA/2 - NAVE_PRINCIPAL.get_width()/2, ALTURA - 100)
     inimigos = list()
     while jogando:
         RELOGIO.tick(FPS)
         TELA.blit(BG, (0, 0))
         jogador.draw(TELA)
-
         for nave in inimigos:
             nave.draw(TELA)
         for event in pygame.event.get():
@@ -211,33 +213,29 @@ def main():
             nave.atirar(nave)
             nave.mover_laser(lasers_vel, jogador)
             nave.mover_nave(inimigos_vel, nave, inimigos)
-        print(len(inimigos))
+
         pygame.display.flip()
 
 def menu_principal():
-    inicio = False
-    timer = 0
-    indice = 0
+    logo_largura = LOGO.get_width()
+    logo_altura = LOGO.get_height()
+    start_largura = START.get_width()
+    start_altura = START.get_height()
     while True:
         RELOGIO.tick(FPS)
-        TELA.blit(BG_MENU[indice], (0, 0))
-        TELA.blit(LOGO, (180, 100))
-
+        TELA.blit(BG, (0, 0))
+        TELA.blit(LOGO, (LARGURA/2 - logo_largura/2, ALTURA/4))
+        TELA.blit(START, (LARGURA/2 - start_largura/2, ALTURA/4 + logo_altura + start_altura))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
-            if event.type == pygame.KEYDOWN:
-                inicio = True
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pos = pygame.mouse.get_pos()
+                if pos[0] >= (LARGURA/2 - start_largura/2) and pos[0] <= (LARGURA/2 + start_largura/2):
+                    if pos[1] >= ALTURA/4 + logo_altura + start_altura and pos[1] <= ALTURA/4 + logo_altura + start_altura + start_altura:
+                        main()
 
-        if inicio:
-            if timer < 10:
-                timer += 1
-            else:
-                indice += 1
-                timer = 0
-            if indice > 4:
-                main()
         pygame.display.flip()
 
 menu_principal()
