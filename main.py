@@ -107,11 +107,14 @@ class Nave():
         tela.blit(self.nave_img, (int(self.x), int(self.y)))
 
     def atirarinterno(self, arma, lasers):
-        self.cool_down_counter -= 1
-        if self.cool_down_counter < 0:
+        if self.cool_down_counter < 1:
             self.cool_down_counter = self.firerate
             laser = Laser(self.x, self.y, self.laser_img, self, arma)
             lasers.append(laser)
+
+    def reduzircooldowndown(self):
+        if self.cool_down_counter > 0:
+            self.cool_down_counter -= 1
 
     def firerateup(self):
         if self.firerate >= 2:
@@ -258,8 +261,6 @@ def main():
     while jogando:
         RELOGIO.tick(FPS)
         TELA.blit(BG, (0, 0))
-        for nave in naves:
-            nave.draw(TELA)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 jogando = False
@@ -299,7 +300,9 @@ def main():
             laser.testevida(lasers)
             laser.drawinterno(TELA)
         for nave in naves:
+            nave.reduzircooldowndown()
             nave.testevida(naves)
+            nave.draw(TELA)
 
         pygame.display.flip()
 
