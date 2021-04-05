@@ -39,43 +39,27 @@ pygame.display.set_icon(ICONE)
 
 # Classes
 class Laser():
-    def __init__(self, x, y, img, nave, indice, arma):
+    def __init__(self, x, y, img, nave, arma):
         self.x = x
         self.y = y
         self.img = img
         self.mascara = pygame.mask.from_surface(self.img)
         self.nave = nave
-        self.indice = indice
-        self.damagetype = nave.damagetype
+        self.damagetype = nave.layer
         self.vel_x = nave.laservel_x[arma]
         self.vel_y = nave.laservel_y[arma]
-        self.hp = nave.laserhp
-        self.arma_x = nave.arma_x[arma]
-        self.arma_y = nave.arma_y[arma]
+        self.hp = nave.laserhp[arma]
+        self.arma = arma
 
-    def draw(self, tela):
-        if self.nave.tipo == "Jogador":
-            tela.blit(self.img, (int(self.x) + (self.nave.largura()//2) - (self.img.get_width()//2), int(self.y)))
-        elif self.nave.tipo == "Inimigo":
-            tela.blit(self.img, (self.x + (self.nave.largura()//2) - (self.img.get_width()//2), self.y + self.nave.altura() - self.img.get_height()))
-        elif self.nave.tipo == "Boss":
-            if self.indice == 0:
-                tela.blit(self.img, (int(self.x) + (self.nave.largura()//4) + (self.img.get_width()*2), int(self.y) + (self.nave.altura()//3) + ((self.img.get_height()//3)*2)))
-            if self.indice == 1:
-                tela.blit(self.img, (int(self.x) + (self.nave.largura()//4) + ((self.img.get_width()*9)//2), int(self.y) + ((self.nave.altura()//3)*2) + (self.img.get_height()//3)))
-            if self.indice == 2:
-                tela.blit(self.img, (int(self.x) + (self.nave.largura()//2) + ((self.img.get_width()*7)//2), int(self.y) + ((self.nave.altura()//3)*2) + (self.img.get_height()//3)))
-            if self.indice == 3:
-                tela.blit(self.img, (int(self.x) + (self.nave.largura()//2) + (self.img.get_width()*6), int(self.y) + (self.nave.altura()//3) + ((self.img.get_height()//3)*2)))
 
     def drawinterno(self, tela):
-        tela.blit(self.img, self.arma_x, self.arma_y)
+        tela.blit(self.img, (int(self.x) + self.nave.arma_x[self.arma],int(self.y) + self.nave.arma_y[self.arma]))
 
     def mover(self, vel):
         self.y += vel
 
-    def fora_tela(self, altura):
-        return self.y <= 0 or self.y >= altura
+    def fora_tela(self,):
+        return self.y <= 0 or self.y >= ALTURA
 
     def colisao(self, obj):
         return testa_colisao(self, obj, self.nave)
@@ -89,26 +73,18 @@ class Laser():
     def moverlaserinterno(self, lasers):
         self.x += self.vel_x
         self.y += self.vel_y
-        if laser.fora_tela(ALTURA):
-            lasers.remove(laser)
+        if self.fora_tela():
+            lasers.remove(self)
 
-    def colisaointerno(self, naves):
+    def colisaointerno(self, naves, lasers):
         for nave in naves:
-            if nave.damagetype == b and self.damagetype == a:
-                if laser.colisao(nave):
-                    nave.hp -= 1
-                    self.hp -= 1
+            if nave.layer != self.damagetype and self.colisao(nave):
+                nave.hp -= 1
+                self.hp -= 1
 
-            elif nave.damagetype == a and self.damagetype ==b:
-                if laser.colisao(nave):
-                    nave.hp -= 1
-                    self.hp -= 1
-
-            if nave.hp < 1:
-                naves.remove(nave)
-
-            if self.hp < 1:
-                lasers.remove(self)
+    def testevida(self, lasers):
+        if self.hp < 1:
+            lasers.remove(self)
 class Nave():
     def __init__(self, x, y):
         self.x = x
@@ -119,37 +95,23 @@ class Nave():
         self.lasers = list()
         self.firerate = 15
         self.cool_down_counter = self.firerate
-        self.damagetype = None
-        self.laservel_x = []
-        self.laservel_y = []
-        self.laserhp = []
+        self.layer = 2
+        self.laservel_x = [0,0,0,0,0]
+        self.laservel_y = [0,0,0,0,0]
+        self.laserhp = [0,0,0,0,0]
         self.hp = 1
-        self.arma_x = []
-        self.arma_y = []
+        self.arma_x = [0,0,0,0,0]
+        self.arma_y = [0,0,0,0,0]
 
     def draw(self, tela):
         tela.blit(self.nave_img, (int(self.x), int(self.y)))
-        for laser in self.lasers:
-            laser.draw(tela)
 
-    def atirar(self, nave, indice):
-        if self.cool_down_counter == 0:
-            self.cool_down_counter = self.firerate
-            if nave.tipo != "Boss":
-                laser = Laser(self.x, self.y, self.laser_img, nave, indice, 0)
-                self.lasers.append(laser)
-            else:
-                laser = Laser(self.x, self.y, self.laser_img, nave, indice, 0)
-                self.lasers.append(laser)
+    def atirarinterno(self, arma, lasers):
         self.cool_down_counter -= 1
-
-    def atirarinterno(self, nave, arma):
-        if self.cool_down_counter == 0:
+        if self.cool_down_counter < 0:
             self.cool_down_counter = self.firerate
-            laser = Laser(self.x, self.y, self.laser_img, nave, indice, arma)
+            laser = Laser(self.x, self.y, self.laser_img, self, arma)
             lasers.append(laser)
-
-        self.cool_down_counter -= 1
 
     def firerateup(self):
         if self.firerate >= 2:
@@ -164,6 +126,10 @@ class Nave():
     def altura(self):
         return self.nave_img.get_height()
 
+    def testevida(self, naves):
+        if self.hp < 1:
+            naves.remove(self)
+
 class Jogador(Nave):
     def __init__(self, x, y):
         super().__init__(x, y)
@@ -172,12 +138,12 @@ class Jogador(Nave):
         self.mascara = pygame.mask.from_surface(self.nave_img)
         self.cool_down_counter = 0
         self.tipo = "Jogador"
-        self.damagetype = "a"
-        self.laserhp = [1]
-        self.laservel_x = [-7]
-        self.laservel_y = [0]
-        self.arma_x = [self.x + 40]
-        self.arma_y = [self.y]
+        self.layer = 1
+        self.laserhp[0] = 1
+        self.laservel_x[0] = 0
+        self.laservel_y[0] = -7
+        self.arma_x[0] = 45
+        self.arma_y[0] = 0
         self.hp = 3
 
     def mover_laser(self, vel, inimigos, boss):
@@ -196,19 +162,19 @@ class Jogador(Nave):
                         self.lasers.remove(laser)
 
 class Inimigo(Nave):
-    def __init__(self, x, y, indice):
+    def __init__(self, x, y,):
         super().__init__(x, y)
-        self.nave_img = NAVES_INIMIGAS[indice]
+        self.nave_img = NAVES_INIMIGAS[0]
         self.laser_img = LASER_RED
         self.mascara = pygame.mask.from_surface(self.nave_img)
         self.tipo = "Inimigo"
         self.firerate = 45
-        self.damagetype = "b"
-        self.laserhp = [1]
-        self.laservel_x = [7]
-        self.laservel_y = [0]
-        self.arma_x = [self.x + 40]
-        self.arma_y = [self.y - 80]
+        self.damagetype = 2
+        self.laserhp[0] = 1
+        self.laservel_x[0] = 0
+        self.laservel_y[0] = 7
+        self.arma_x[0] = self.x + 40
+        self.arma_y[0] = self.y - 80
 
     def mover_laser(self, vel, jogador):
         for laser in self.lasers:
@@ -234,13 +200,28 @@ class Boss(Nave):
         self.mascara = pygame.mask.from_surface(self.nave_img)
         self.tipo = "Boss"
         self.firerate = 60
-        self.damagetype = "b"
-        self.laserhp = [1,1,1,1]
-        self.laservel_x = [7,7,7,7]
-        self.laservel_y = [0,0,0,0]
+        self.damagetype = 2
+        self.laserhp[0] = 1
+        self.laserhp[1] = 1
+        self.laserhp[2] = 1
+        self.laserhp[3] = 1
+        self.laservel_x[0] = 0
+        self.laservel_x[1] = 0
+        self.laservel_x[2] = 0
+        self.laservel_x[3] = 0
+        self.laservel_y[0] = 7
+        self.laservel_y[1] = 7
+        self.laservel_y[2] = 7
+        self.laservel_y[3] = 7
         self.hp = 100
-        self.arma_x = [self.x + 40, self.x + 20, self.x + 30, self.x + 10]
-        self.arma_y = [self.y - 80, self.y - 80, self.y - 80, self.y - 80]
+        self.arma_x[0] = self.x + 40
+        self.arma_x[1] = self.x + 40
+        self.arma_x[2] = self.x + 40
+        self.arma_x[3] = self.x + 40
+        self.arma_y[0] = self.y - 80
+        self.arma_y[1] = self.y - 80
+        self.arma_y[2] = self.y - 80
+        self.arma_y[3] = self.y - 80
 
     def mover_laser(self, vel, jogador):
         for laser in self.lasers:
@@ -268,22 +249,16 @@ def testa_colisao(obj1, obj2, obj3):
 def main():
     jogando = True
     jogador_vel = 5
-    lasers_vel = 7
     inimigos_vel = 1
     naves = list()
     jogador = Jogador(LARGURA//2 - NAVE_PRINCIPAL.get_width()/2, ALTURA - 100)
     naves.append(jogador)
-    boss = Boss(LARGURA//2 - NAVES_INIMIGAS[3].get_width()/2, 50, 3)
-    naves.append(Boss)
-    inimigos = list()
     lasers = list()
 
     while jogando:
         RELOGIO.tick(FPS)
         TELA.blit(BG, (0, 0))
-        jogador.draw(TELA)
-        boss.draw(TELA)
-        for nave in inimigos:
+        for nave in naves:
             nave.draw(TELA)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -296,9 +271,8 @@ def main():
                     pygame.quit()
                     exit()
                 if event.key == pygame.K_u:
-                    inimigo = Inimigo(random.randint(100, 500), 0, random.randint(0, 2))
-                    inimigos.append(inimigo)
-                    naves.append(inimigo)
+                    inimigotempo = Inimigo(random.randint(100, 500), 0)
+                    naves.append(inimigotempo)
 
                 if event.key == pygame.K_l:
                     jogador.firerateup()
@@ -317,20 +291,15 @@ def main():
         if keys[pygame.K_s] and jogador.y + jogador_vel + jogador.altura() < ALTURA:
             jogador.y += jogador_vel
         if keys[pygame.K_SPACE]:
-            jogador.atirar(jogador, None)
-
-        boss.atirar(boss, random.randint(0, 3))
-        boss.mover_laser(lasers_vel, jogador)
-
-        jogador.mover_laser(-lasers_vel, inimigos, boss)
-
-        for nave in inimigos:
-            nave.atirar(nave, None)
-            nave.mover_laser(lasers_vel, jogador)
-            nave.mover_nave(inimigos_vel, nave, inimigos)
+            jogador.atirarinterno(0,lasers)
 
         for laser in lasers:
-            laser.moverlaserinterno()
+            laser.moverlaserinterno(lasers)
+            laser.colisaointerno(naves, lasers)
+            laser.testevida(lasers)
+            laser.drawinterno(TELA)
+        for nave in naves:
+            nave.testevida(naves)
 
         pygame.display.flip()
 
