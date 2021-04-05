@@ -55,18 +55,18 @@ class Laser():
 
     def draw(self, tela):
         if self.nave.tipo == "Jogador":
-            tela.blit(self.img, (self.x + (self.nave.largura()//2) - (self.img.get_width()//2), self.y))
+            tela.blit(self.img, (int(self.x) + (self.nave.largura()//2) - (self.img.get_width()//2), int(self.y)))
         elif self.nave.tipo == "Inimigo":
             tela.blit(self.img, (self.x + (self.nave.largura()//2) - (self.img.get_width()//2), self.y + self.nave.altura() - self.img.get_height()))
         elif self.nave.tipo == "Boss":
             if self.indice == 0:
-                tela.blit(self.img, (self.x + (self.nave.largura()//4) + (self.img.get_width()*2), self.y + (self.nave.altura()//3) + ((self.img.get_height()//3)*2)))
+                tela.blit(self.img, (int(self.x) + (self.nave.largura()//4) + (self.img.get_width()*2), int(self.y) + (self.nave.altura()//3) + ((self.img.get_height()//3)*2)))
             if self.indice == 1:
-                tela.blit(self.img, (self.x + (self.nave.largura()//4) + ((self.img.get_width()*9)//2), self.y + ((self.nave.altura()//3)*2) + (self.img.get_height()//3)))
+                tela.blit(self.img, (int(self.x) + (self.nave.largura()//4) + ((self.img.get_width()*9)//2), int(self.y) + ((self.nave.altura()//3)*2) + (self.img.get_height()//3)))
             if self.indice == 2:
-                tela.blit(self.img, (self.x + (self.nave.largura()//2) + ((self.img.get_width()*7)//2), self.y + ((self.nave.altura()//3)*2) + (self.img.get_height()//3)))
+                tela.blit(self.img, (int(self.x) + (self.nave.largura()//2) + ((self.img.get_width()*7)//2), int(self.y) + ((self.nave.altura()//3)*2) + (self.img.get_height()//3)))
             if self.indice == 3:
-                tela.blit(self.img, (self.x + (self.nave.largura()//2) + (self.img.get_width()*6), self.y + (self.nave.altura()//3) + ((self.img.get_height()//3)*2)))
+                tela.blit(self.img, (int(self.x) + (self.nave.largura()//2) + (self.img.get_width()*6), int(self.y) + (self.nave.altura()//3) + ((self.img.get_height()//3)*2)))
 
     def drawinterno(self, tela):
         tela.blit(self.img, self.arma_x, self.arma_y)
@@ -86,12 +86,29 @@ class Laser():
     def altura(self):
         return self.img.get_height()
 
-    def moverlaserinterno(self):
+    def moverlaserinterno(self, lasers):
         self.x += self.vel_x
         self.y += self.vel_y
         if laser.fora_tela(ALTURA):
             lasers.remove(laser)
 
+    def colisaointerno(self, naves):
+        for nave in naves:
+            if nave.damagetype == b and self.damagetype == a:
+                if laser.colisao(nave):
+                    nave.hp -= 1
+                    self.hp -= 1
+
+            elif nave.damagetype == a and self.damagetype ==b:
+                if laser.colisao(nave):
+                    nave.hp -= 1
+                    self.hp -= 1
+
+            if nave.hp < 1:
+                naves.remove(nave)
+
+            if self.hp < 1:
+                lasers.remove(self)
 class Nave():
     def __init__(self, x, y):
         self.x = x
@@ -111,7 +128,7 @@ class Nave():
         self.arma_y = []
 
     def draw(self, tela):
-        tela.blit(self.nave_img, (self.x, self.y))
+        tela.blit(self.nave_img, (int(self.x), int(self.y)))
         for laser in self.lasers:
             laser.draw(tela)
 
@@ -133,7 +150,6 @@ class Nave():
             lasers.append(laser)
 
         self.cool_down_counter -= 1
-
 
     def firerateup(self):
         if self.firerate >= 2:
@@ -174,8 +190,7 @@ class Jogador(Nave):
                     for obj in inimigos:
                         if laser.colisao(obj):
                             inimigos.remove(obj)
-                            if self.piercing:
-                                self.lasers.remove(laser)
+                            self.lasers.remove(laser)
                 else:
                     if laser.colisao(boss):
                         self.lasers.remove(laser)
