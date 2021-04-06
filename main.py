@@ -3,8 +3,8 @@ import random
 import os
 from sys import exit
 
-LARGURA = 750
-ALTURA = 750
+LARGURA = 550
+ALTURA = 550
 FPS = 60
 BRANCO = (255, 255, 255)
 RELOGIO = pygame.time.Clock()
