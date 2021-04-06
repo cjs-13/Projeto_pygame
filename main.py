@@ -87,8 +87,10 @@ class Laser():
     def colisaointerno(self, naves, lasers):
         for nave in naves:
             if nave.layer != self.damagetype and self.colisao(nave):
-                nave.hp -= 1
                 self.hp -= 1
+                if nave.imunity_timer == 0:
+                    nave.hp -= 1
+                    self.imunity_timer = 1
 
     def testevida(self, lasers):
         if self.hp < 1:
@@ -105,10 +107,13 @@ class Nave():
         self.firerate = 15
         self.cool_down_counter = self.firerate
         self.layer = 2
+        self.imunity_timer = 0
+        self.hp = 1
+        self.max_hp = 1
+        self.lives = 1
         self.laservel_x = [0,0,0,0,0]
         self.laservel_y = [0,0,0,0,0]
         self.laserhp = [0,0,0,0,0]
-        self.hp = 1
         self.arma_x = [0,0,0,0,0]
         self.arma_y = [0,0,0,0,0]
 
@@ -121,9 +126,12 @@ class Nave():
             laser = Laser(self.x, self.y, self.laser_img, self, arma)
             lasers.append(laser)
 
-    def reduzircooldowndown(self):
+    def reduzirtimers(self):
         if self.cool_down_counter > 0:
             self.cool_down_counter -= 1
+
+        if self.imunity_timer > 0:
+            self.imunity_timer -= 1
 
     def firerateup(self):
         if self.firerate >= 2:
@@ -139,8 +147,12 @@ class Nave():
         return self.nave_img.get_height()
 
     def testevida(self, naves):
-        if self.hp < 1:
+        if self.hp < 1 and self.lives < 2:
             naves.remove(self)
+        elif self.hp < 1 and self.lives > 1:
+            self.lives -= 1
+            self.hp = self.max_hp
+            self.imunity_timer = 180
 
 class Jogador(Nave):
     def __init__(self, x, y):
@@ -152,12 +164,14 @@ class Jogador(Nave):
         self.cool_down_counter = 0
         self.tipo = "Jogador"
         self.layer = 1
+        self.hp = 10
+        self.max_hp = 10
+        self.lives = 3
         self.laserhp[0] = 1
         self.laservel_x[0] = 0
         self.laservel_y[0] = -7
         self.arma_x[0] = 45
         self.arma_y[0] = 0
-        self.hp = 10
 
     def draw_hp(self, tela):
         tela.blit(self.hp_img[0], (50, ALTURA + 15))
@@ -283,7 +297,7 @@ def main():
             laser.testevida(lasers)
             laser.drawinterno(TELA)
         for nave in naves:
-            nave.reduzircooldowndown()
+            nave.reduzirtimers()
             nave.testevida(naves)
             if nave.tipo == "Inimigo":
                 nave.mover_nave(inimigos_vel, nave, naves)
