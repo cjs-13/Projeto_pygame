@@ -14,7 +14,9 @@ SCALE_NAVE = (100, 90)
 SCALE_BOSS = (350, 280)
 
 pygame.init()
-TELA = pygame.display.set_mode((LARGURA, ALTURA))
+pygame.font.init()
+FONT_PRINCIPAL = pygame.font.SysFont("Letter Gothic", 35)
+TELA = pygame.display.set_mode((LARGURA, ALTURA + 40))
 
 # Carregando imagens
 NAVE_PRINCIPAL = pygame.transform.scale(pygame.image.load(os.path.join("assets", "space_ship.png")).convert_alpha(), SCALE_NAVE)
@@ -26,13 +28,16 @@ for i in range(1, 2):
     NAVES_INIMIGAS.append(pygame.transform.scale(pygame.image.load(os.path.join("assets", f"boss_ship ({i}).png")).convert_alpha(), SCALE_BOSS))
 LASER_RED = pygame.image.load(os.path.join("assets", "laser_red.png")).convert_alpha()
 LASER_BLUE = pygame.image.load(os.path.join("assets", "laser_blue.png")).convert_alpha()
-BG = pygame.transform.scale(pygame.image.load(os.path.join("assets", "BG.png")).convert(), (LARGURA, ALTURA))
-BG_MENU = list()
-for i in range(1, 6):
-    BG_MENU.append(pygame.transform.scale(pygame.image.load(os.path.join("assets", f"BG_menu ({i}).png")).convert(), (LARGURA, ALTURA)))
+HP = list()
+HP.append(pygame.transform.scale(pygame.image.load(os.path.join("assets", "hp (1).png")), (297, 10)))
+HP.append(pygame.transform.scale(pygame.image.load(os.path.join("assets", "hp (2).png")), (280, 5)))
+BARRA_INF = pygame.transform.scale(pygame.image.load(os.path.join("assets", "barra.png")), (LARGURA, 40))
+BG = pygame.transform.scale(pygame.image.load(os.path.join("assets", "BG.png")).convert(), (LARGURA, ALTURA + 40))
 ICONE = pygame.image.load(os.path.join("assets", "space_ship.png"))
 LOGO = pygame.transform.scale(pygame.image.load(os.path.join("assets", "titulo.png")), (138 * UP_SCALE_TITULO, 46 * UP_SCALE_TITULO))
-START = pygame.transform.scale(pygame.image.load(os.path.join("assets", "start.png")), (146 * UP_SCALE_MENU, 23 * UP_SCALE_MENU))
+MENU_OP = list()
+for i in range(1, 4):
+    MENU_OP.append(pygame.transform.scale(pygame.image.load(os.path.join("assets", f"menu ({i}).png")), (146 * UP_SCALE_MENU, 23 * UP_SCALE_MENU)))
 
 pygame.display.set_caption("Space Shooter")
 pygame.display.set_icon(ICONE)
@@ -51,12 +56,8 @@ class Laser():
         self.hp = nave.laserhp[arma]
         self.arma = arma
 
-
     def drawinterno(self, tela):
         tela.blit(self.img, (int(self.x) + self.nave.arma_x[self.arma],int(self.y) + self.nave.arma_y[self.arma]))
-
-    def mover(self, vel):
-        self.y += vel
 
     def fora_tela(self,):
         return self.y <= 0 or self.y >= ALTURA
@@ -85,6 +86,7 @@ class Laser():
     def testevida(self, lasers):
         if self.hp < 1:
             lasers.remove(self)
+
 class Nave():
     def __init__(self, x, y):
         self.x = x
@@ -138,6 +140,7 @@ class Jogador(Nave):
         super().__init__(x, y)
         self.nave_img = NAVE_PRINCIPAL
         self.laser_img = LASER_PRINCIPAL
+        self.hp_img = HP
         self.mascara = pygame.mask.from_surface(self.nave_img)
         self.cool_down_counter = 0
         self.tipo = "Jogador"
@@ -147,27 +150,16 @@ class Jogador(Nave):
         self.laservel_y[0] = -7
         self.arma_x[0] = 45
         self.arma_y[0] = 0
-        self.hp = 3
+        self.hp = 10
 
-    def mover_laser(self, vel, inimigos, boss):
-        for laser in self.lasers:
-            laser.mover(vel)
-            if laser.fora_tela(ALTURA):
-                self.lasers.remove(laser)
-            else:
-                if len(inimigos) > 0:
-                    for obj in inimigos:
-                        if laser.colisao(obj):
-                            inimigos.remove(obj)
-                            self.lasers.remove(laser)
-                else:
-                    if laser.colisao(boss):
-                        self.lasers.remove(laser)
+    def draw_hp(self, tela):
+        tela.blit(self.hp_img[0], (50, ALTURA + 15))
+        tela.blit(pygame.transform.scale(self.hp_img[1], (28 * self.hp, 5)), (59, ALTURA + 18))
 
 class Inimigo(Nave):
     def __init__(self, x, y,):
         super().__init__(x, y)
-        self.nave_img = NAVES_INIMIGAS[0]
+        self.nave_img = NAVES_INIMIGAS[random.randint(0, 2)]
         self.laser_img = LASER_RED
         self.mascara = pygame.mask.from_surface(self.nave_img)
         self.tipo = "Inimigo"
@@ -176,16 +168,8 @@ class Inimigo(Nave):
         self.laserhp[0] = 1
         self.laservel_x[0] = 0
         self.laservel_y[0] = 7
-        self.arma_x[0] = self.x + 40
-        self.arma_y[0] = self.y - 80
-
-    def mover_laser(self, vel, jogador):
-        for laser in self.lasers:
-            laser.mover(vel)
-            if laser.fora_tela(ALTURA):
-                self.lasers.remove(laser)
-            elif laser.colisao(jogador):
-                self.lasers.remove(laser)
+        self.arma_x[0] = 45
+        self.arma_y[0] = self.altura() - 30
 
     def fora_tela(self, altura):
         return self.y >= altura
@@ -196,9 +180,9 @@ class Inimigo(Nave):
             inimigos.remove(nave)
 
 class Boss(Nave):
-    def __init__(self, x, y, indice):
+    def __init__(self, x, y):
         super().__init__(x, y)
-        self.nave_img = NAVES_INIMIGAS[indice]
+        self.nave_img = NAVES_INIMIGAS[3]
         self.laser_img = LASER_BLUE
         self.mascara = pygame.mask.from_surface(self.nave_img)
         self.tipo = "Boss"
@@ -226,14 +210,6 @@ class Boss(Nave):
         self.arma_y[2] = self.y - 80
         self.arma_y[3] = self.y - 80
 
-    def mover_laser(self, vel, jogador):
-        for laser in self.lasers:
-            laser.mover(vel)
-            if laser.fora_tela(ALTURA):
-                self.lasers.remove(laser)
-            elif laser.colisao(jogador):
-                self.lasers.remove(laser)
-
 # obj1 == Laser, obj2 == Nave atingida, obj3 == Nave que disparou
 def testa_colisao(obj1, obj2, obj3):
     diff_x = 0
@@ -244,9 +220,8 @@ def testa_colisao(obj1, obj2, obj3):
         if obj3.tipo == "Inimigo":
             diff_y = int(diff_y - obj2.altura() + obj1.altura())
     elif obj3.tipo == "Boss":
-        diff_x = int(obj2.x - obj1.x - int(obj3.largura() / 2) + (obj1.largura() / 2))
-        diff_y = int(obj2.y - obj1.y)
-        # print(diff_x)
+        diff_x = int(obj2.x - obj1.x - obj2.largura() + obj1.largura())
+        diff_y = int(obj2.y - obj1.y + obj1.altura())
     return obj1.mascara.overlap(obj2.mascara, (diff_x, diff_y)) != None
 
 def main():
@@ -257,10 +232,12 @@ def main():
     jogador = Jogador(LARGURA//2 - NAVE_PRINCIPAL.get_width()/2, ALTURA - 100)
     naves.append(jogador)
     lasers = list()
+    hp_label = FONT_PRINCIPAL.render("HP:", True, BRANCO)
 
     while jogando:
         RELOGIO.tick(FPS)
         TELA.blit(BG, (0, 0))
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 jogando = False
@@ -280,7 +257,6 @@ def main():
 
                 if event.key == pygame.K_k:
                     jogador.fireratedown()
-
 
         keys = pygame.key.get_pressed()
         if (keys[pygame.K_a] or keys[pygame.K_LEFT]) and jogador.x - jogador_vel > 0:
@@ -302,20 +278,29 @@ def main():
         for nave in naves:
             nave.reduzircooldowndown()
             nave.testevida(naves)
+            if nave.tipo == "Inimigo":
+                nave.mover_nave(inimigos_vel, nave, naves)
+                nave.atirarinterno(0, lasers)
             nave.draw(TELA)
+
+        TELA.blit(BARRA_INF, (0, ALTURA))
+        jogador.draw_hp(TELA)
+        TELA.blit(hp_label, (7, ALTURA + 7))
 
         pygame.display.flip()
 
 def menu_principal():
     logo_largura = LOGO.get_width()
     logo_altura = LOGO.get_height()
-    start_largura = START.get_width()
-    start_altura = START.get_height()
+    start_largura = MENU_OP[0].get_width()
+    start_altura = MENU_OP[0].get_height()
+
     while True:
         RELOGIO.tick(FPS)
         TELA.blit(BG, (0, 0))
         TELA.blit(LOGO, (LARGURA//2 - logo_largura//2, ALTURA//4))
-        TELA.blit(START, (LARGURA//2 - start_largura//2, ALTURA//4 + logo_altura + start_altura))
+        for i in range(3):
+            TELA.blit(MENU_OP[i], (LARGURA//2 - start_largura//2, ALTURA//4 + logo_altura + start_altura + i*start_altura*(3/2)))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -325,6 +310,11 @@ def menu_principal():
                 if pos[0] >= (LARGURA//2 - start_largura//2) and pos[0] <= (LARGURA//2 + start_largura//2):
                     if pos[1] >= ALTURA//4 + logo_altura + start_altura and pos[1] <= ALTURA//4 + logo_altura + start_altura + start_altura:
                         main()
+                    elif pos[1] >= ALTURA//4 + logo_altura + start_altura + start_altura*(3/2) and pos[1] <= ALTURA//4 + logo_altura + 2*start_altura + start_altura*(3/2):
+                            pass
+                    elif pos[1] >= ALTURA//4 + logo_altura + start_altura + 2*start_altura*(3/2) and pos[1] <= ALTURA//4 + logo_altura + 2*start_altura + 2*start_altura*(3/2):
+                        pygame.quit()
+                        exit()
 
         pygame.display.flip()
 
