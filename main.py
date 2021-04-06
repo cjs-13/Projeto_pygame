@@ -77,7 +77,7 @@ class Laser():
         if self.fora_tela():
             lasers.remove(self)
 
-    def colisaointerno(self, naves, lasers):
+    def colisaointerno(self, naves):
         for nave in naves:
             if nave.layer != self.damagetype and self.colisao(nave):
                 nave.hp -= 1
@@ -164,7 +164,6 @@ class Inimigo(Nave):
         self.mascara = pygame.mask.from_surface(self.nave_img)
         self.tipo = "Inimigo"
         self.firerate = 45
-        self.damagetype = 2
         self.laserhp[0] = 1
         self.laservel_x[0] = 0
         self.laservel_y[0] = 7
@@ -272,7 +271,7 @@ def main():
 
         for laser in lasers:
             laser.moverlaserinterno(lasers)
-            laser.colisaointerno(naves, lasers)
+            laser.colisaointerno(naves)
             laser.testevida(lasers)
             laser.drawinterno(TELA)
         for nave in naves:
@@ -281,6 +280,8 @@ def main():
             if nave.tipo == "Inimigo":
                 nave.mover_nave(inimigos_vel, nave, naves)
                 nave.atirarinterno(0, lasers)
+                if nave.y > ALTURA:
+                    nave.hp -= 1
             nave.draw(TELA)
 
         TELA.blit(BARRA_INF, (0, ALTURA))
@@ -300,7 +301,7 @@ def menu_principal():
         TELA.blit(BG, (0, 0))
         TELA.blit(LOGO, (LARGURA//2 - logo_largura//2, ALTURA//4))
         for i in range(3):
-            TELA.blit(MENU_OP[i], (LARGURA//2 - start_largura//2, ALTURA//4 + logo_altura + start_altura + i*start_altura*(3/2)))
+            TELA.blit(MENU_OP[i], (int(LARGURA//2 - start_largura//2), int(ALTURA//4 + logo_altura + start_altura + i*start_altura*(3/2))))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
