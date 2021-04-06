@@ -39,7 +39,14 @@ MENU_OP = list()
 for i in range(1, 4):
     MENU_OP.append(pygame.transform.scale(pygame.image.load(os.path.join("assets", f"menu ({i}).png")), (146 * UP_SCALE_MENU, 23 * UP_SCALE_MENU)))
 
-pygame.display.set_caption("Space Shooter")
+## Imagens da tela inicial
+BG = pygame.image.load(os.path.join("assets", "fundo.png"))
+B_INICIAR = pygame.image.load(os.path.join("assets", "iniciar.png"))
+B_AJUDA = pygame.image.load(os.path.join("assets", "ajuda.png"))
+B_SAIR = pygame.image.load(os.path.join("assets", "sair.png"))
+
+
+pygame.display.set_caption("__Invasores do Espaço__")
 pygame.display.set_icon(ICONE)
 
 # Classes
@@ -77,7 +84,7 @@ class Laser():
         if self.fora_tela():
             lasers.remove(self)
 
-    def colisaointerno(self, naves):
+    def colisaointerno(self, naves, lasers):
         for nave in naves:
             if nave.layer != self.damagetype and self.colisao(nave):
                 nave.hp -= 1
@@ -164,6 +171,7 @@ class Inimigo(Nave):
         self.mascara = pygame.mask.from_surface(self.nave_img)
         self.tipo = "Inimigo"
         self.firerate = 45
+        self.damagetype = 2
         self.laserhp[0] = 1
         self.laservel_x[0] = 0
         self.laservel_y[0] = 7
@@ -271,7 +279,7 @@ def main():
 
         for laser in lasers:
             laser.moverlaserinterno(lasers)
-            laser.colisaointerno(naves)
+            laser.colisaointerno(naves, lasers)
             laser.testevida(lasers)
             laser.drawinterno(TELA)
         for nave in naves:
@@ -280,8 +288,6 @@ def main():
             if nave.tipo == "Inimigo":
                 nave.mover_nave(inimigos_vel, nave, naves)
                 nave.atirarinterno(0, lasers)
-                if nave.y > ALTURA:
-                    nave.hp -= 1
             nave.draw(TELA)
 
         TELA.blit(BARRA_INF, (0, ALTURA))
@@ -291,31 +297,45 @@ def main():
         pygame.display.flip()
 
 def menu_principal():
-    logo_largura = LOGO.get_width()
-    logo_altura = LOGO.get_height()
-    start_largura = MENU_OP[0].get_width()
-    start_altura = MENU_OP[0].get_height()
+    B_INICIAR_largura = B_INICIAR.get_width()
+    B_INICIAR_altura = B_INICIAR.get_height()
+    largura_geral = LARGURA//2 - B_INICIAR_largura//2
 
+    altura_iniciar=ALTURA
+    altura_ajuda=ALTURA
+    altura_sair=ALTURA
+ 
     while True:
         RELOGIO.tick(FPS)
         TELA.blit(BG, (0, 0))
-        TELA.blit(LOGO, (LARGURA//2 - logo_largura//2, ALTURA//4))
-        for i in range(3):
-            TELA.blit(MENU_OP[i], (int(LARGURA//2 - start_largura//2), int(ALTURA//4 + logo_altura + start_altura + i*start_altura*(3/2))))
+
+        ## Animação na TELA inicial
+        if altura_iniciar > ALTURA//3:
+            altura_iniciar-=3
+        if altura_ajuda > ALTURA//2:
+            altura_ajuda-=2
+        if altura_sair > ALTURA//1.5:
+            altura_sair-=1
+        TELA.blit(B_INICIAR, (largura_geral, altura_iniciar))
+        TELA.blit(B_AJUDA, (largura_geral, altura_ajuda))
+        TELA.blit(B_SAIR, (largura_geral, altura_sair))
+       
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                pos = pygame.mouse.get_pos()
-                if pos[0] >= (LARGURA//2 - start_largura//2) and pos[0] <= (LARGURA//2 + start_largura//2):
-                    if pos[1] >= ALTURA//4 + logo_altura + start_altura and pos[1] <= ALTURA//4 + logo_altura + start_altura + start_altura:
-                        main()
-                    elif pos[1] >= ALTURA//4 + logo_altura + start_altura + start_altura*(3/2) and pos[1] <= ALTURA//4 + logo_altura + 2*start_altura + start_altura*(3/2):
-                            pass
-                    elif pos[1] >= ALTURA//4 + logo_altura + start_altura + 2*start_altura*(3/2) and pos[1] <= ALTURA//4 + logo_altura + 2*start_altura + 2*start_altura*(3/2):
-                        pygame.quit()
-                        exit()
+            if event.type == pygame.MOUSEBUTTONDOWN: ## Monitora clique do mouse
+                x = pygame.mouse.get_pos()[0]
+                y = pygame.mouse.get_pos()[1]
+                if x > 123 and y > 220 and x <414 and y < 255:
+                    #print("Botão iniciar apertado")
+                    main()
+                if x > 123 and y > 313 and x <414 and y < 349:
+                    print("Botão ajuda apertado")
+                if x > 123 and y > 405 and x <414 and y < 436:
+                    #print("Botão sair apertado")
+                    pygame.quit()
+                    exit()
 
         pygame.display.flip()
 
