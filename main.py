@@ -40,7 +40,7 @@ for i in range(1, 4):
     MENU_OP.append(pygame.transform.scale(pygame.image.load(os.path.join("assets", f"menu ({i}).png")), (146 * UP_SCALE_MENU, 23 * UP_SCALE_MENU)))
 
 ## Imagens da tela inicial
-BG = pygame.image.load(os.path.join("assets", "fundo.png"))
+BG_INICIO = pygame.image.load(os.path.join("assets", "fundo.png"))
 B_INICIAR = pygame.image.load(os.path.join("assets", "iniciar.png"))
 B_AJUDA = pygame.image.load(os.path.join("assets", "ajuda.png"))
 B_SAIR = pygame.image.load(os.path.join("assets", "sair.png"))
@@ -307,7 +307,7 @@ def menu_principal():
  
     while True:
         RELOGIO.tick(FPS)
-        TELA.blit(BG, (0, 0))
+        TELA.blit(BG_INICIO, (0, 0))
 
         ## Animação na TELA inicial
         if altura_iniciar > ALTURA//3:
@@ -327,12 +327,12 @@ def menu_principal():
             if event.type == pygame.MOUSEBUTTONDOWN: ## Monitora clique do mouse
                 x = pygame.mouse.get_pos()[0]
                 y = pygame.mouse.get_pos()[1]
-                if x > 123 and y > 220 and x <414 and y < 255:
+                if x > 123 and y > 220 and x < 414 and y < 255:
                     #print("Botão iniciar apertado")
                     main()
-                if x > 123 and y > 313 and x <414 and y < 349:
+                if x > 123 and y > 313 and x < 414 and y < 349:
                     print("Botão ajuda apertado")
-                if x > 123 and y > 405 and x <414 and y < 436:
+                if x > 123 and y > 405 and x < 414 and y < 436:
                     #print("Botão sair apertado")
                     pygame.quit()
                     exit()
