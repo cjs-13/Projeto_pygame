@@ -283,16 +283,17 @@ def main():
                     jogador.fireratedown()
 
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_a] and jogador.x - jogador_vel > 0:
+        if (keys[pygame.K_a] or keys[pygame.K_LEFT]) and jogador.x - jogador_vel > 0:
             jogador.x -= jogador_vel
-        if keys[pygame.K_d] and jogador.x + jogador_vel + jogador.largura() < LARGURA:
+        if (keys[pygame.K_d] or keys[pygame.K_RIGHT]) and jogador.x + jogador_vel + jogador.largura() < LARGURA:
             jogador.x += jogador_vel
-        if keys[pygame.K_w] and jogador.y - jogador_vel > 0:
+        if (keys[pygame.K_w] or keys[pygame.K_UP]) and jogador.y - jogador_vel > 0:
             jogador.y -= jogador_vel
-        if keys[pygame.K_s] and jogador.y + jogador_vel + jogador.altura() < ALTURA:
+        if (keys[pygame.K_s] or keys[pygame.K_DOWN]) and jogador.y + jogador_vel + jogador.altura() < ALTURA:
             jogador.y += jogador_vel
-        if keys[pygame.K_SPACE]:
-            jogador.atirarinterno(0, lasers)
+
+        if (keys[pygame.K_SPACE]):
+            jogador.atirarinterno(0,lasers)
 
         for laser in lasers:
             laser.moverlaserinterno(lasers)
