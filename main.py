@@ -326,8 +326,8 @@ def main():
         RELOGIO.tick(FPS)
         TELA.blit(BG, (0, 0))
 
-        # Spawn aleatório de inimigos
-        if len(naves) < 6:
+        #Spawn aleatório de inimigos
+        if len(naves) < 5:
             inimigotempo = Inimigo(random.randint(0, 450), 0, random.randint(0, 2))
             naves.append(inimigotempo)
 
