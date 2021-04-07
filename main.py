@@ -314,8 +314,8 @@ def main():
         TELA.blit(BG, (0, 0))
 
         #Spawn aleatório de inimigos
-        if len(naves)<6:
-            inimigotempo = Inimigo(random.randint(0, 500), 0)
+        if len(naves) < 6:
+            inimigotempo = Inimigo(random.randint(0, 500), 0,random.randint(0,2))
             naves.append(inimigotempo)
 
         for event in pygame.event.get():
