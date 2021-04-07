@@ -45,6 +45,11 @@ B_INICIAR = pygame.image.load(os.path.join("assets", "iniciar.png"))
 B_AJUDA = pygame.image.load(os.path.join("assets", "ajuda.png"))
 B_SAIR = pygame.image.load(os.path.join("assets", "sair.png"))
 
+## Imagens da tela de ajuda
+BG_AJUDA = pygame.transform.scale(pygame.image.load(os.path.join("assets", "BG_ajuda.png")).convert(), (LARGURA, ALTURA + 40))
+B_VOLTAR = pygame.image.load(os.path.join("assets", "voltar.png"))
+#B_AJUDA = pygame.image.load(os.path.join("assets", "ajuda.png"))
+
 
 pygame.display.set_caption("__Invasores do Espaço__")
 pygame.display.set_icon(ICONE)
@@ -312,7 +317,7 @@ def main():
 
 def menu_principal():
     B_INICIAR_largura = B_INICIAR.get_width()
-    B_INICIAR_altura = B_INICIAR.get_height()
+    #B_INICIAR_altura = B_INICIAR.get_height()
     largura_geral = LARGURA//2 - B_INICIAR_largura//2
 
     altura_iniciar=ALTURA
@@ -325,11 +330,12 @@ def menu_principal():
 
         ## Animação na TELA inicial
         if altura_iniciar > ALTURA//3:
-            altura_iniciar-=3
+            altura_iniciar-=4
         if altura_ajuda > ALTURA//2:
-            altura_ajuda-=2
+            altura_ajuda-=3
         if altura_sair > ALTURA//1.5:
-            altura_sair-=1
+            altura_sair-=2
+
         TELA.blit(B_INICIAR, (largura_geral, altura_iniciar))
         TELA.blit(B_AJUDA, (largura_geral, altura_ajuda))
         TELA.blit(B_SAIR, (largura_geral, altura_sair))
@@ -345,11 +351,40 @@ def menu_principal():
                     #print("Botão iniciar apertado")
                     main()
                 if x > 123 and y > 313 and x < 414 and y < 349:
-                    print("Botão ajuda apertado")
+                    #print("Botão ajuda apertado")
+                    ajuda()
                 if x > 123 and y > 405 and x < 414 and y < 436:
                     #print("Botão sair apertado")
                     pygame.quit()
                     exit()
+
+        pygame.display.flip()
+
+def ajuda():
+    B_VOLTAR_largura = B_VOLTAR.get_width()
+    #B_VOLTAR_altura = B_VOLTAR.get_height()
+    largura = LARGURA//2 - B_VOLTAR_largura//2
+    altura_voltar = ALTURA
+    
+    while True:
+        RELOGIO.tick(FPS)
+        TELA.blit(BG_AJUDA, (0, 0))
+
+        if altura_voltar > ALTURA//1.15:
+            altura_voltar-=4
+
+        TELA.blit(B_VOLTAR, (largura, altura_voltar))
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if event.type == pygame.MOUSEBUTTONDOWN: ## Monitora clique do mouse
+                x = pygame.mouse.get_pos()[0]
+                y = pygame.mouse.get_pos()[1]
+                
+                if x > 123 and y > 515 and x < 414 and y < 552:
+                    menu_principal()
 
         pygame.display.flip()
 
