@@ -18,44 +18,52 @@ pygame.font.init()
 FONT_PRINCIPAL = pygame.font.SysFont("Letter Gothic", 35)
 TELA = pygame.display.set_mode((LARGURA, ALTURA + 40))
 
-# Carregando imagens
-NAVE_PRINCIPAL = pygame.transform.scale(pygame.image.load(os.path.join("assets", "space_ship.png")).convert_alpha(), SCALE_NAVE)
-LASER_PRINCIPAL = pygame.image.load(os.path.join("assets", "laser_principal.png")).convert_alpha()
+
+# FUNÇÕES PARA TORNAR O CÓDIGO MENOS VERBOSO
+
+def carrega_imagem(caminho, nome_imagem):
+    return pygame.image.load(os.path.join(caminho, nome_imagem))
+
+def muda_escala(imagem, escala):
+    return pygame.transform.scale(imagem, escala)
+
+# CARREGANDO IMAGENS
+
+# Tela inicial
+BG_INICIO = carrega_imagem("assets", "fundo.png")
+B_INICIAR = carrega_imagem("assets", "iniciar.png")
+B_AJUDA = carrega_imagem("assets", "ajuda.png")
+B_SAIR = carrega_imagem("assets", "sair.png")
+
+# Tela de ajuda
+BG_AJUDA = muda_escala(carrega_imagem("assets", "BG_ajuda.png").convert(), (LARGURA, ALTURA + 40))
+B_VOLTAR = carrega_imagem("assets", "voltar.png")
+
+# Telas das fases do jogo
+NAVE_PRINCIPAL = muda_escala(carrega_imagem("assets", "space_ship.png").convert_alpha(), SCALE_NAVE)
+LASER_PRINCIPAL = carrega_imagem("assets", "laser_principal.png").convert_alpha()
 NAVES_INIMIGAS = list()
 for i in range(1, 4):
-    NAVES_INIMIGAS.append(pygame.transform.scale(pygame.image.load(os.path.join("assets", f"enemy_ship ({i}).png")).convert_alpha(), SCALE_NAVE))
+    NAVES_INIMIGAS.append(muda_escala(carrega_imagem("assets", f"enemy_ship ({i}).png").convert_alpha(), SCALE_NAVE))
 for i in range(1, 2):
-    NAVES_INIMIGAS.append(pygame.transform.scale(pygame.image.load(os.path.join("assets", f"boss_ship ({i}).png")).convert_alpha(), SCALE_BOSS))
-LASER_RED = pygame.image.load(os.path.join("assets", "laser_red.png")).convert_alpha()
-LASER_BLUE = pygame.image.load(os.path.join("assets", "laser_blue.png")).convert_alpha()
+    NAVES_INIMIGAS.append(muda_escala(carrega_imagem("assets", f"boss_ship ({i}).png").convert_alpha(), SCALE_BOSS))
+LASER_RED = carrega_imagem("assets", "laser_red.png").convert_alpha()
+LASER_BLUE = carrega_imagem("assets", "laser_blue.png").convert_alpha()
 HP = list()
-HP.append(pygame.transform.scale(pygame.image.load(os.path.join("assets", "hp (1).png")), (297, 10)))
-HP.append(pygame.transform.scale(pygame.image.load(os.path.join("assets", "hp (2).png")), (280, 5)))
-BARRA_INF = pygame.transform.scale(pygame.image.load(os.path.join("assets", "barra.png")), (LARGURA, 40))
-BG = pygame.transform.scale(pygame.image.load(os.path.join("assets", "BG.png")).convert(), (LARGURA, ALTURA + 40))
-ICONE = pygame.image.load(os.path.join("assets", "space_ship.png"))
-LOGO = pygame.transform.scale(pygame.image.load(os.path.join("assets", "titulo.png")), (138 * UP_SCALE_TITULO, 46 * UP_SCALE_TITULO))
-MENU_OP = list()
-for i in range(1, 4):
-    MENU_OP.append(pygame.transform.scale(pygame.image.load(os.path.join("assets", f"menu ({i}).png")), (146 * UP_SCALE_MENU, 23 * UP_SCALE_MENU)))
+HP.append(muda_escala(carrega_imagem("assets", "hp (1).png"), (297, 10)))
+HP.append(muda_escala(carrega_imagem("assets", "hp (2).png"), (280, 5)))
+BARRA_INF = muda_escala(carrega_imagem("assets", "barra.png"), (LARGURA, 40))
+BG = muda_escala(carrega_imagem("assets", "BG.png").convert(), (LARGURA, ALTURA + 40))
 
-# Imagens da tela inicial
-BG_INICIO = pygame.image.load(os.path.join("assets", "fundo.png"))
-B_INICIAR = pygame.image.load(os.path.join("assets", "iniciar.png"))
-B_AJUDA = pygame.image.load(os.path.join("assets", "ajuda.png"))
-B_SAIR = pygame.image.load(os.path.join("assets", "sair.png"))
-
-# Imagens da tela de ajuda
-BG_AJUDA = pygame.transform.scale(pygame.image.load(os.path.join("assets", "BG_ajuda.png")).convert(), (LARGURA, ALTURA + 40))
-B_VOLTAR = pygame.image.load(os.path.join("assets", "voltar.png"))
-# B_AJUDA = pygame.image.load(os.path.join("assets", "ajuda.png"))
-
+# Icone e Logo
+ICONE = carrega_imagem("assets", "space_ship.png")
+LOGO = muda_escala(carrega_imagem("assets", "titulo.png"), (138 * UP_SCALE_TITULO, 46 * UP_SCALE_TITULO))
 
 pygame.display.set_caption("__Invasores do Espaço__")
 pygame.display.set_icon(ICONE)
 
+# DEFINIÇÃO DAS CLASSES
 
-# Classes
 class Laser():
     def __init__(self, x, y, img, nave, arma):
         self.x = x + nave.arma_x[arma]
@@ -200,6 +208,7 @@ class Nave():
             self.atirarinterno(1, lasers)
             self.atirarinterno(2, lasers)
 
+
 class Jogador(Nave):
     def __init__(self, x, y):
         super().__init__(x, y)
@@ -224,7 +233,8 @@ class Jogador(Nave):
 
     def draw_hp(self, tela):
         tela.blit(self.hp_img[0], (50, ALTURA + 15))
-        tela.blit(pygame.transform.scale(self.hp_img[1], (28 * self.hp, 5)), (59, ALTURA + 18))
+        tela.blit(muda_escala(self.hp_img[1], (28 * self.hp, 5)), (59, ALTURA + 18))
+
 
 class Inimigo(Nave):
     def __init__(self, x, y, ai):
@@ -293,12 +303,13 @@ class Boss(Nave):
         self.arma_y[3] = self.y - 80
 
 
-# obj1 == Laser, obj2 == Nave atingida, obj3 == Nave que disparou
 def testa_colisao(obj1, obj2):
+    # obj1 == Laser, obj2 == Nave atingida, obj3 == Nave que disparou
     diff_x = obj2.x - obj1.x
     diff_y = obj2.y - obj1.y
     return obj1.mascara.overlap(obj2.mascara, (int(diff_x),int(diff_y))) != None
 
+# FUNÇÕES QUE CHAMAM AS JANELAS DA APLICAÇÃO
 
 def main():
     jogando = True
@@ -366,10 +377,8 @@ def main():
 
         pygame.display.flip()
 
-
 def menu_principal():
     B_INICIAR_largura = B_INICIAR.get_width()
-    # B_INICIAR_altura = B_INICIAR.get_height()
     largura_geral = LARGURA//2 - B_INICIAR_largura//2
 
     altura_iniciar = ALTURA
@@ -380,7 +389,7 @@ def menu_principal():
         RELOGIO.tick(FPS)
         TELA.blit(BG_INICIO, (0, 0))
 
-        # Animação na TELA inicial
+        # Animação dos Botões
         if altura_iniciar > ALTURA//3:
             altura_iniciar -= 4
         if altura_ajuda > ALTURA//2:
@@ -400,22 +409,17 @@ def menu_principal():
                 x = pygame.mouse.get_pos()[0]
                 y = pygame.mouse.get_pos()[1]
                 if 123 < x < 414 and 220 < y < 255:
-                    # print("Botão iniciar apertado")
                     main()
                 if 123 < x < 414 and 313 < y < 349:
-                    # print("Botão ajuda apertado")
                     ajuda()
                 if 123 < x < 414 and 405 < y < 436:
-                    # print("Botão sair apertado")
                     pygame.quit()
                     exit()
 
         pygame.display.flip()
 
-
 def ajuda():
     B_VOLTAR_largura = B_VOLTAR.get_width()
-    # B_VOLTAR_altura = B_VOLTAR.get_height()
     largura = LARGURA//2 - B_VOLTAR_largura//2
     altura_voltar = ALTURA
     
@@ -432,6 +436,9 @@ def ajuda():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    menu_principal()
             if event.type == pygame.MOUSEBUTTONDOWN:  # Monitora clique do mouse
                 x = pygame.mouse.get_pos()[0]
                 y = pygame.mouse.get_pos()[1]
@@ -440,6 +447,5 @@ def ajuda():
                     menu_principal()
 
         pygame.display.flip()
-
 
 menu_principal()
