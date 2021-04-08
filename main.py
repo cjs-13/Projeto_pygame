@@ -58,8 +58,8 @@ pygame.display.set_icon(ICONE)
 # Classes
 class Laser():
     def __init__(self, x, y, img, nave, arma):
-        self.x = x
-        self.y = y
+        self.x = x + nave.arma_x[arma]
+        self.y = y + nave.arma_y[arma]
         self.img = img
         self.mascara = pygame.mask.from_surface(self.img)
         self.nave = nave
@@ -70,13 +70,13 @@ class Laser():
         self.arma = arma
 
     def drawinterno(self, tela):
-        tela.blit(self.img, (int(self.x) + self.nave.arma_x[self.arma], int(self.y) + self.nave.arma_y[self.arma]))
+        tela.blit(self.img, (int(self.x) , int(self.y) ))
 
     def fora_tela(self,):
         return self.y <= 0 or self.y >= ALTURA
 
     def colisao(self, obj):
-        return testa_colisao(self, obj, self.nave)
+        return testa_colisao(self, obj)
 
     def largura(self):
         return self.img.get_width()
@@ -110,7 +110,7 @@ class Nave():
         self.nave_img = None
         self.laser_img = None
         self.tipo = None
-        self.lasers = list()
+        # self.lasers = list()
         self.firerate = [15, 15, 15, 15, 15]
         self.cool_down_counter = [0, 0, 0, 0, 0]
         self.layer = 2
@@ -196,12 +196,9 @@ class Nave():
     def ai2_inimigo(self, lasers):
         if self.y < 20:
             self.y += 2
-        if self.cool_down_counter[1] == 0 and self.cool_down_counter[1] == 0:
+        if self.cool_down_counter[0] == 0 and self.cool_down_counter[1] == 0:
             self.atirarinterno(1, lasers)
             self.atirarinterno(2, lasers)
-        if self.fora_tela(ALTURA):
-            self.hp = 0
-
 
 class Jogador(Nave):
     def __init__(self, x, y):
@@ -242,7 +239,6 @@ class Inimigo(Nave):
         self.firerate[0] = 45
         self.firerate[1] = 30
         self.firerate[2] = 30
-        self.cool_down_counter[2] = 60
         self.laserhp[0] = 1
         self.laserhp[1] = 1
         self.laserhp[2] = 1
@@ -298,18 +294,10 @@ class Boss(Nave):
 
 
 # obj1 == Laser, obj2 == Nave atingida, obj3 == Nave que disparou
-def testa_colisao(obj1, obj2, obj3):
-    diff_x = 0
-    diff_y = 0
-    if obj3.tipo == "Jogador" or obj3.tipo == "Inimigo":
-        diff_x = int(obj2.x - obj1.x - int(obj3.largura()/2) + (obj1.largura()/2))
-        diff_y = int(obj2.y - obj1.y)
-        if obj3.tipo == "Inimigo":
-            diff_y = int(diff_y - obj2.altura() + obj1.altura())
-    elif obj3.tipo == "Boss":
-        diff_x = int(obj2.x - obj1.x - obj2.largura() + obj1.largura())
-        diff_y = int(obj2.y - obj1.y + obj1.altura())
-    return obj1.mascara.overlap(obj2.mascara, (diff_x, diff_y)) != None
+def testa_colisao(obj1, obj2):
+    diff_x = obj2.x - obj1.x
+    diff_y = obj2.y - obj1.y
+    return obj1.mascara.overlap(obj2.mascara, (int(diff_x),int(diff_y))) != None
 
 
 def main():
@@ -326,7 +314,7 @@ def main():
         RELOGIO.tick(FPS)
         TELA.blit(BG, (0, 0))
 
-        #Spawn aleatório de inimigos
+        # Spawn aleatório de inimigos
         if len(naves) < 5:
             inimigotempo = Inimigo(random.randint(0, 450), 0, random.randint(0, 2))
             naves.append(inimigotempo)
@@ -339,8 +327,6 @@ def main():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     jogando = False
-                    pygame.quit()
-                    exit()
                 if event.key == pygame.K_u:
                     inimigotempo = Inimigo(random.randint(100, 450), 0, random.randint(0, 2))
                     naves.append(inimigotempo)
