@@ -7,9 +7,6 @@ LARGURA = 550
 ALTURA = 550
 FPS = 60
 BRANCO = (255, 255, 255)
-RELOGIO = pygame.time.Clock()
-UP_SCALE_TITULO = 3
-UP_SCALE_MENU = 2
 SCALE_NAVE = (100, 90)
 SCALE_BOSS = (350, 280)
 
@@ -17,6 +14,7 @@ pygame.init()
 pygame.font.init()
 FONT_PRINCIPAL = pygame.font.SysFont("Letter Gothic", 35)
 TELA = pygame.display.set_mode((LARGURA, ALTURA + 40))
+RELOGIO = pygame.time.Clock()
 
 
 # FUNÇÕES PARA TORNAR O CÓDIGO MENOS VERBOSO
@@ -57,7 +55,7 @@ BG = muda_escala(carrega_imagem("assets", "BG.png").convert(), (LARGURA, ALTURA 
 
 # Icone e Logo
 ICONE = carrega_imagem("assets", "space_ship.png")
-LOGO = muda_escala(carrega_imagem("assets", "titulo.png"), (138 * UP_SCALE_TITULO, 46 * UP_SCALE_TITULO))
+#LOGO = muda_escala(carrega_imagem("assets", "titulo.png"), (138 * UP_SCALE_TITULO, 46 * UP_SCALE_TITULO))
 
 pygame.display.set_caption("__Invasores do Espaço__")
 pygame.display.set_icon(ICONE)
@@ -80,8 +78,8 @@ class Laser():
     def drawinterno(self, tela):
         tela.blit(self.img, (int(self.x) , int(self.y) ))
 
-    def fora_tela(self,):
-        return self.y <= 0 or self.y >= ALTURA
+    def fora_tela(self):
+        return (self.y <= 0 or self.y >= ALTURA) or (self.x <= 0 or self.x >= LARGURA)
 
     def colisao(self, obj):
         return testa_colisao(self, obj)
@@ -110,7 +108,6 @@ class Laser():
         if self.hp < 1:
             lasers.remove(self)
 
-
 class Nave():
     def __init__(self, x, y):
         self.x = x
@@ -118,7 +115,6 @@ class Nave():
         self.nave_img = None
         self.laser_img = None
         self.tipo = None
-        # self.lasers = list()
         self.firerate = [15, 15, 15, 15, 15]
         self.cool_down_counter = [0, 0, 0, 0, 0]
         self.layer = 2
@@ -314,7 +310,6 @@ def testa_colisao(obj1, obj2):
 def main():
     jogando = True
     jogador_vel = 5
-    inimigos_vel = 1
     naves = list()
     jogador = Jogador(LARGURA//2 - NAVE_PRINCIPAL.get_width()/2, ALTURA - 100)
     naves.append(jogador)
