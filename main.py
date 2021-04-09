@@ -27,7 +27,8 @@ def muda_escala(imagem, escala):
 
 # CARREGANDO IMAGENS
 
-# Tela inicial
+# Tela inicial e Menu Principal
+TEXTO = carrega_imagem("assets", "nome.png").convert_alpha()
 BG_INICIO = carrega_imagem("assets", "fundo.png")
 B_INICIAR = carrega_imagem("assets", "iniciar.png")
 B_AJUDA = carrega_imagem("assets", "ajuda.png")
@@ -376,21 +377,24 @@ def menu_principal():
     B_INICIAR_largura = B_INICIAR.get_width()
     largura_geral = LARGURA//2 - B_INICIAR_largura//2
 
-    altura_iniciar = ALTURA
-    altura_ajuda = ALTURA
-    altura_sair = ALTURA
+    altura_iniciar = ALTURA + 100
+    altura_ajuda = ALTURA + 100
+    altura_sair = ALTURA + 100
  
     while True:
         RELOGIO.tick(FPS)
         TELA.blit(BG_INICIO, (0, 0))
 
         # Animação dos Botões
-        if altura_iniciar > ALTURA//3:
-            altura_iniciar -= 4
-        if altura_ajuda > ALTURA//2:
-            altura_ajuda -= 3
-        if altura_sair > ALTURA//1.5:
-            altura_sair -= 2
+        if altura_iniciar > ALTURA//2.5:
+            altura_iniciar -= 14
+            
+        else:    
+            if altura_ajuda > altura_iniciar + (ALTURA//5):
+                altura_ajuda -= 14
+            else:
+                if altura_sair > altura_ajuda + (ALTURA//5):
+                    altura_sair -= 14
 
         TELA.blit(B_INICIAR, (largura_geral, altura_iniciar))
         TELA.blit(B_AJUDA, (largura_geral, altura_ajuda))
@@ -403,11 +407,11 @@ def menu_principal():
             if event.type == pygame.MOUSEBUTTONDOWN:  # Monitora clique do mouse
                 x = pygame.mouse.get_pos()[0]
                 y = pygame.mouse.get_pos()[1]
-                if 123 < x < 414 and 220 < y < 255:
+                if 139 < x < 414 and 256 < y < 289:
                     main()
-                if 123 < x < 414 and 313 < y < 349:
+                if 139 < x < 414 and 352 < y < 395:
                     ajuda()
-                if 123 < x < 414 and 405 < y < 436:
+                if 139 < x < 414 and 449 < y < 484:
                     pygame.quit()
                     exit()
 
@@ -443,4 +447,64 @@ def ajuda():
 
         pygame.display.flip()
 
-menu_principal()
+def tela_inicial():
+    larg_nome = TEXTO.get_width()
+    larg_nave_p = NAVE_PRINCIPAL.get_width()
+    larg_nave_boss = NAVES_INIMIGAS[3].get_width()
+
+    largura_nome = LARGURA//2 - larg_nome//2
+    largura_nave = LARGURA//2 - larg_nave_p//2
+    largura_nave_i1 = LARGURA//1.5
+    largura_nave_i2 = LARGURA//4 - larg_nave_p//2
+    largura_nave_i3 = LARGURA//2 - larg_nave_p//2
+    largura_boss = LARGURA//2 - larg_nave_boss//2
+
+    altura_nome = ALTURA
+    altura_nave_p = ALTURA + 300
+    altura_nave_i1 = ALTURA + 350
+    altura_nave_i2 = ALTURA + 350
+    altura_nave_i3 = ALTURA + 350
+    altura_nave_b = ALTURA  + 400
+
+    naves_passando = True
+
+    def girar(imagem):
+        return pygame.transform.rotate(imagem,180)
+
+    # Nave principal passando
+    while naves_passando:
+        RELOGIO.tick(FPS)
+        TELA.blit(BG, (0, 0))
+
+        if altura_nome > -500:
+            altura_nome -= 7
+        if altura_nave_p > -90:
+            altura_nave_p -= 5
+        if altura_nave_i1 > -100:
+            altura_nave_i1 -= 4
+        if altura_nave_i2 > -100:
+            altura_nave_i2 -= 4
+        if altura_nave_i3 > -100:
+            altura_nave_i3 -= 4
+        if altura_nave_b > -300:
+            altura_nave_b -= 3
+        else:
+            menu_principal()
+        
+        TELA.blit(TEXTO,(largura_nome,altura_nome))
+        TELA.blit(NAVE_PRINCIPAL, (largura_nave, altura_nave_p))
+        TELA.blit(girar(NAVES_INIMIGAS[0]), (largura_nave_i1, altura_nave_i1))
+        TELA.blit(girar(NAVES_INIMIGAS[1]), (largura_nave_i2, altura_nave_i2))
+        TELA.blit(girar(NAVES_INIMIGAS[2]), (largura_nave_i3, altura_nave_i3))
+        TELA.blit(girar(NAVES_INIMIGAS[3]), (largura_boss, altura_nave_b))
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    menu_principal()
+        pygame.display.flip()
+    
+tela_inicial()
