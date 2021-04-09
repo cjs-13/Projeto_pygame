@@ -18,8 +18,10 @@ RELOGIO = pygame.time.Clock()
 
 # FUNÇÕES PARA TORNAR O CÓDIGO MENOS VERBOSO
 
+
 def carrega_imagem(caminho, nome_imagem):
     return pygame.image.load(os.path.join(caminho, nome_imagem))
+
 
 def muda_escala(imagem, escala):
     return pygame.transform.scale(imagem, escala)
@@ -27,6 +29,8 @@ def muda_escala(imagem, escala):
 # CARREGANDO IMAGENS
 
 # Tela inicial e Menu Principal
+
+
 TEXTO = carrega_imagem("assets", "nome.png").convert_alpha()
 BG_INICIO = carrega_imagem("assets", "fundo.png")
 B_INICIAR = carrega_imagem("assets", "iniciar.png")
@@ -63,6 +67,7 @@ pygame.display.set_icon(ICONE)
 
 # DEFINIÇÃO DAS CLASSES
 
+
 class Laser():
     def __init__(self, x, y, img, nave, arma):
         self.x = x + nave.arma_x[arma]
@@ -77,7 +82,7 @@ class Laser():
         self.arma = arma
 
     def drawinterno(self, tela):
-        tela.blit(self.img, (int(self.x) , int(self.y) ))
+        tela.blit(self.img, (int(self.x), int(self.y)))
 
     def fora_tela(self):
         return (self.y <= 0 or self.y >= ALTURA) or (self.x <= 0 or self.x >= LARGURA)
@@ -97,7 +102,7 @@ class Laser():
         if self.fora_tela():
             lasers.remove(self)
 
-    def colisaointerno(self, naves,lasers):
+    def colisaointerno(self, naves, lasers):
         for nave in naves:
             if nave.layer != self.damagetype and self.colisao(nave):
                 self.hp -= 1
@@ -108,6 +113,7 @@ class Laser():
     def testevida(self, lasers):
         if self.hp < 1:
             lasers.remove(self)
+
 
 class Nave():
     def __init__(self, x, y):
@@ -205,6 +211,7 @@ class Nave():
             self.atirarinterno(1, lasers)
             self.atirarinterno(2, lasers)
 
+
 class Jogador(Nave):
     def __init__(self, x, y):
         super().__init__(x, y)
@@ -230,6 +237,7 @@ class Jogador(Nave):
     def draw_hp(self, tela):
         tela.blit(self.hp_img[0], (50, ALTURA + 15))
         tela.blit(muda_escala(self.hp_img[1], (28 * self.hp, 5)), (59, ALTURA + 18))
+
 
 class Inimigo(Nave):
     def __init__(self, x, y, ai):
@@ -262,6 +270,7 @@ class Inimigo(Nave):
 
     def fora_tela(self, altura):
         return self.y >= altura
+
 
 class Boss(Nave):
     def __init__(self, x, y, ai):
@@ -296,8 +305,64 @@ class Boss(Nave):
         self.arma_y[2] = self.y - 80
         self.arma_y[3] = self.y - 80
 
+
+class Fase():
+    def __init__(self):
+        self.fase = 0
+        self.wave = 0
+        self.counter = -1
+        self.counteracive = True
+        self.dificuty = 1
+
+    def criar_inimigo(self, x, y, ai, naves):  # cria um inimigo
+        inimigotempo = Inimigo(x, y, ai)
+        naves.append(inimigotempo)
+
+    def direcionar_fase(self,naves):  # testa em qual fase esta e roda ela
+        if self.fase == 0:
+            self.faseid0(naves)
+
+    def sem_inimigos(self, naves):  # olha se tem inimigos e reativa o contador
+        if len(naves) < 2:
+            self.counteracive = True
+
+    def counter_tick(self):
+        if self.counteracive:  # anda o contador se ele estiver ativo
+            self.counter += 1
+
+    def wave_id0(self, naves):  # onda de id 0, spawna inimigos e uma formação de / \
+        if self.counter % (120 / self.dificuty) != 0:
+            self.counteracive = True
+        elif self.counter == 0: # spawna inimigos quando o counter e igual a 0
+            self.criar_inimigo(5, 0, 0, naves)
+            self.criar_inimigo(450, 0, 0, naves)
+        elif self.counter == 120 / self.dificuty:  # spawna inimigos quando o counter e igual a 120 na dificuldade 1
+            self.criar_inimigo(65, 0, 0, naves)
+            self.criar_inimigo(390, 0, 0, naves)
+        elif self.counter == 240 / self.dificuty:  # spawna inimigos quando o counter e igual a 240 na dificuldade 1
+            self.criar_inimigo(125, 0, 0, naves)
+            self.criar_inimigo(330, 0, 0, naves)
+        elif self.counter == 360 / self.dificuty:  # spawna inimigos quando o counter e igual a 360 na dificuldade 1
+            self.criar_inimigo(185, 0, 0, naves)
+            self.criar_inimigo(270, 0, 0, naves)
+        elif self.counter == 480 / self.dificuty:  # termina a onda quando o counter e igual a 480 na dificuldade 1
+            self.counter = -1  # reseta o contador
+            self.wave += 1  # anda para a proxima onda
+            self.counteracive = False  # desativa o contador
+
+    def faseid0(self, naves):  # a primeira fase
+
+        if self.wave == 0:  # onda 1
+            self.wave_id0(naves)
+
+        elif self.wave == 1 and self.counteracive is False:  # testa se ainda tem inimigos antes de avançar as ondas
+            self.sem_inimigos(naves)
+
+        elif self.wave == 1:  # onda 2
+            self.wave_id0(naves)
+
 def testa_colisao(obj1, obj2):
-    # obj1 == Laser, obj2 == Nave atingida, obj3 == Nave que disparou
+    # obj1 == Laser, obj2 == Nave atingida
     diff_x = obj2.x - obj1.x
     diff_y = obj2.y - obj1.y
     return obj1.mascara.overlap(obj2.mascara, (int(diff_x),int(diff_y))) != None
@@ -311,6 +376,7 @@ def main():
     jogador = Jogador(LARGURA//2 - NAVE_PRINCIPAL.get_width()/2, ALTURA - 100)
     naves.append(jogador)
     lasers = list()
+    fase = Fase()
     hp_label = FONT_PRINCIPAL.render("HP:", True, BRANCO)
 
     while jogando:
@@ -318,9 +384,8 @@ def main():
         TELA.blit(BG, (0, 0))
 
         # Spawn aleatório de inimigos
-        if len(naves) < 5:
-            inimigotempo = Inimigo(random.randint(0, 450), 0, random.randint(0, 2))
-            naves.append(inimigotempo)
+        '''if len(naves) < 5:
+            fase.criar_inimigo(random.randint(5, 450), 0, random.randint(0, 2), naves)'''
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -331,14 +396,13 @@ def main():
                 if event.key == pygame.K_ESCAPE:
                     jogando = False
                 if event.key == pygame.K_u:
-                    inimigotempo = Inimigo(random.randint(100, 450), 0, random.randint(0, 2))
-                    naves.append(inimigotempo)
+                    fase.criar_inimigo(random.randint(5,450),0,random.randint(0,2) , naves)
 
                 if event.key == pygame.K_l:
                     jogador.firerateup()
 
                 if event.key == pygame.K_k:
-                    jogador.fireratedown()
+                    fase.comecar_fase0(naves)
 
         keys = pygame.key.get_pressed()
         if (keys[pygame.K_a] or keys[pygame.K_LEFT]) and jogador.x - jogador_vel > 0:
@@ -357,6 +421,7 @@ def main():
             laser.colisaointerno(naves, lasers)
             laser.testevida(lasers)
             laser.drawinterno(TELA)
+
         for nave in naves:
             nave.reduzirtimers()
             nave.testevida(naves)
@@ -366,6 +431,9 @@ def main():
         TELA.blit(BARRA_INF, (0, ALTURA))
         jogador.draw_hp(TELA)
         TELA.blit(hp_label, (7, ALTURA + 7))
+
+        fase.direcionar_fase(naves)
+        fase.counter_tick()
 
         pygame.display.flip()
 
@@ -506,7 +574,7 @@ def tela_inicial():
         # Colocando imagens na tela
         TELA.blit(TEXTO,(largura_nome,altura_nome))
         TELA.blit(NAVE_PRINCIPAL, (largura_nave, altura_nave_p))
-        TELA.blit(girar(NAVES_INIMIGAS[0]), (largura_nave_i1, altura_nave_i1))
+        TELA.blit(girar(NAVES_INIMIGAS[0]), (int(largura_nave_i1), int(altura_nave_i1)))
         TELA.blit(girar(NAVES_INIMIGAS[1]), (largura_nave_i2, altura_nave_i2))
         TELA.blit(girar(NAVES_INIMIGAS[2]), (largura_nave_i3, altura_nave_i3))
         TELA.blit(girar(NAVES_INIMIGAS[3]), (largura_boss, altura_nave_b))
