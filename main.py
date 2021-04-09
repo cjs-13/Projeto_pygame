@@ -314,6 +314,17 @@ class Fase():
         self.counteracive = True
         self.dificuty = 1
 
+    def pular_onda(self):
+        self.counter = -1
+        self.counteracive = True
+        self.wave += 1
+
+    def pular_fase(self):
+        self.counter = -1
+        self.counter = True
+        self.wave = 0
+        self.fase += 1
+
     def criar_inimigo(self, x, y, ai, naves):  # cria um inimigo
         inimigotempo = Inimigo(x, y, ai)
         naves.append(inimigotempo)
@@ -350,6 +361,21 @@ class Fase():
             self.wave += 1  # anda para a proxima onda
             self.counteracive = False  # desativa o contador
 
+    def wave_id1(self, naves):  # onda de id 1, spawna inimigos em formação de ---
+        if self.counter % (120 / self.dificuty) != 0:
+            self.counteracive = True
+        elif self.counter == 0:  # spawna a linha de inimigos simples
+            self.criar_inimigo(5, 0, 0, naves)
+            self.criar_inimigo(105, 0, 0, naves)
+            self.criar_inimigo(205, 0, 0, naves)
+            self.criar_inimigo(250, 0, 0, naves)
+            self.criar_inimigo(350, 0, 0, naves)
+            self.criar_inimigo(450, 0, 0, naves)
+        elif self.counter == 120 / self.dificuty:
+            self.counter = -1  # reseta o contador
+            self.wave += 1  # anda para a proxima onda
+            self.counteracive = False  # desativa o contador
+
     def faseid0(self, naves):  # a primeira fase
 
         if self.wave == 0:  # onda 1
@@ -359,7 +385,16 @@ class Fase():
             self.sem_inimigos(naves)
 
         elif self.wave == 1:  # onda 2
-            self.wave_id0(naves)
+            self.wave_id1(naves)
+
+        elif self.wave == 2 and self.counteracive is False:
+            self.counteracive = True
+
+        elif self.wave == 2:
+            self.wave_id1(naves)
+
+        elif self.wave == 3:
+            self.pular_fase()
 
 def testa_colisao(obj1, obj2):
     # obj1 == Laser, obj2 == Nave atingida
@@ -402,7 +437,7 @@ def main():
                     jogador.firerateup()
 
                 if event.key == pygame.K_k:
-                    fase.comecar_fase0(naves)
+                    fase.pular_fase()
 
         keys = pygame.key.get_pressed()
         if (keys[pygame.K_a] or keys[pygame.K_LEFT]) and jogador.x - jogador_vel > 0:
