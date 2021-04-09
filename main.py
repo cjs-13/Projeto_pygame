@@ -16,7 +16,6 @@ FONT_PRINCIPAL = pygame.font.SysFont("Letter Gothic", 35)
 TELA = pygame.display.set_mode((LARGURA, ALTURA + 40))
 RELOGIO = pygame.time.Clock()
 
-
 # FUNÇÕES PARA TORNAR O CÓDIGO MENOS VERBOSO
 
 def carrega_imagem(caminho, nome_imagem):
@@ -54,9 +53,10 @@ HP.append(muda_escala(carrega_imagem("assets", "hp (2).png"), (280, 5)))
 BARRA_INF = muda_escala(carrega_imagem("assets", "barra.png"), (LARGURA, 40))
 BG = muda_escala(carrega_imagem("assets", "BG.png").convert(), (LARGURA, ALTURA + 40))
 
-# Icone e Logo
+# Icone do Jogo
 ICONE = carrega_imagem("assets", "space_ship.png")
-#LOGO = muda_escala(carrega_imagem("assets", "titulo.png"), (138 * UP_SCALE_TITULO, 46 * UP_SCALE_TITULO))
+
+# ADIÇÃO DE NOME E ICONE À JANELA DO JOGO
 
 pygame.display.set_caption("__Invasores do Espaço__")
 pygame.display.set_icon(ICONE)
@@ -205,7 +205,6 @@ class Nave():
             self.atirarinterno(1, lasers)
             self.atirarinterno(2, lasers)
 
-
 class Jogador(Nave):
     def __init__(self, x, y):
         super().__init__(x, y)
@@ -231,7 +230,6 @@ class Jogador(Nave):
     def draw_hp(self, tela):
         tela.blit(self.hp_img[0], (50, ALTURA + 15))
         tela.blit(muda_escala(self.hp_img[1], (28 * self.hp, 5)), (59, ALTURA + 18))
-
 
 class Inimigo(Nave):
     def __init__(self, x, y, ai):
@@ -264,7 +262,6 @@ class Inimigo(Nave):
 
     def fora_tela(self, altura):
         return self.y >= altura
-
 
 class Boss(Nave):
     def __init__(self, x, y, ai):
@@ -299,14 +296,13 @@ class Boss(Nave):
         self.arma_y[2] = self.y - 80
         self.arma_y[3] = self.y - 80
 
-
 def testa_colisao(obj1, obj2):
     # obj1 == Laser, obj2 == Nave atingida, obj3 == Nave que disparou
     diff_x = obj2.x - obj1.x
     diff_y = obj2.y - obj1.y
     return obj1.mascara.overlap(obj2.mascara, (int(diff_x),int(diff_y))) != None
 
-# FUNÇÕES QUE CHAMAM AS JANELAS DA APLICAÇÃO
+# JANELAS DO JOGO
 
 def main():
     jogando = True
@@ -374,9 +370,13 @@ def main():
         pygame.display.flip()
 
 def menu_principal():
+    # Pegando a largura as imagens usadas na tela
     B_INICIAR_largura = B_INICIAR.get_width()
+
+    # Definindo a coordenada horizontal de início da imagem
     largura_geral = LARGURA//2 - B_INICIAR_largura//2
 
+    # Definindo a coordenada vertical de início da imagem
     altura_iniciar = ALTURA + 100
     altura_ajuda = ALTURA + 100
     altura_sair = ALTURA + 100
@@ -385,10 +385,9 @@ def menu_principal():
         RELOGIO.tick(FPS)
         TELA.blit(BG_INICIO, (0, 0))
 
-        # Animação dos Botões
+        # Atualizações na posição vertical de cada imagem
         if altura_iniciar > ALTURA//2.5:
             altura_iniciar -= 14
-            
         else:    
             if altura_ajuda > altura_iniciar + (ALTURA//5):
                 altura_ajuda -= 14
@@ -396,15 +395,17 @@ def menu_principal():
                 if altura_sair > altura_ajuda + (ALTURA//5):
                     altura_sair -= 14
 
+        # Colocando imagens na tela
         TELA.blit(B_INICIAR, (largura_geral, altura_iniciar))
         TELA.blit(B_AJUDA, (largura_geral, altura_ajuda))
         TELA.blit(B_SAIR, (largura_geral, altura_sair))
        
+        # Controle de Eventos de Mouse e Teclado
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:  # Monitora clique do mouse
+            if event.type == pygame.MOUSEBUTTONDOWN:
                 x = pygame.mouse.get_pos()[0]
                 y = pygame.mouse.get_pos()[1]
                 if 139 < x < 414 and 256 < y < 289:
@@ -418,21 +419,28 @@ def menu_principal():
         pygame.display.flip()
 
 def ajuda():
+    # Pegando a largura as imagens usadas na tela
     B_VOLTAR_largura = B_VOLTAR.get_width()
+
+    # Definindo a coordenada horizontal de início da imagem
     largura = LARGURA//2 - B_VOLTAR_largura//2
+
+    # Definindo a coordenada vertical de início da imagem
     altura_voltar = ALTURA
     
     ajuda = True
-
     while ajuda:
         RELOGIO.tick(FPS)
         TELA.blit(BG_AJUDA, (0, 0))
 
+        # Atualizações na posição vertical de cada imagem
         if altura_voltar > ALTURA//1.15:
             altura_voltar -= 4
 
+        # Colocando imagem na tela
         TELA.blit(B_VOLTAR, (largura, altura_voltar))
         
+        # Controle de Eventos de Mouse e Teclado
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -442,18 +450,18 @@ def ajuda():
                     ajuda = False
             if event.type == pygame.MOUSEBUTTONDOWN:  # Monitora clique do mouse
                 x = pygame.mouse.get_pos()[0]
-                y = pygame.mouse.get_pos()[1]
-                
+                y = pygame.mouse.get_pos()[1]               
                 if 123 < x < 414 and 515 < y < 552:
                     menu_principal()
-
         pygame.display.flip()
 
 def tela_inicial():
+    # Pegando a largura as imagens usadas na tela
     larg_nome = TEXTO.get_width()
     larg_nave_p = NAVE_PRINCIPAL.get_width()
     larg_nave_boss = NAVES_INIMIGAS[3].get_width()
 
+    # Definindo a coordenada horizontal de início de cada imagem
     largura_nome = LARGURA//2 - larg_nome//2
     largura_nave = LARGURA//2 - larg_nave_p//2
     largura_nave_i1 = LARGURA//1.5
@@ -461,6 +469,7 @@ def tela_inicial():
     largura_nave_i3 = LARGURA//2 - larg_nave_p//2
     largura_boss = LARGURA//2 - larg_nave_boss//2
 
+    # Definindo a coordenada vertical de início de cada imagem
     altura_nome = ALTURA
     altura_nave_p = ALTURA + 300
     altura_nave_i1 = ALTURA + 350
@@ -468,16 +477,17 @@ def tela_inicial():
     altura_nave_i3 = ALTURA + 350
     altura_nave_b = ALTURA  + 400
 
-    naves_passando = True
+    
 
     def girar(imagem):
         return pygame.transform.rotate(imagem,180)
 
-    # Nave principal passando
+    naves_passando = True
     while naves_passando:
         RELOGIO.tick(FPS)
         TELA.blit(BG, (0, 0))
 
+        # Atualizações na posição vertical de cada imagem
         if altura_nome > -500:
             altura_nome -= 7
         if altura_nave_p > -90:
@@ -493,6 +503,7 @@ def tela_inicial():
         else:
             menu_principal()
         
+        # Colocando imagens na tela
         TELA.blit(TEXTO,(largura_nome,altura_nome))
         TELA.blit(NAVE_PRINCIPAL, (largura_nave, altura_nave_p))
         TELA.blit(girar(NAVES_INIMIGAS[0]), (largura_nave_i1, altura_nave_i1))
@@ -500,6 +511,7 @@ def tela_inicial():
         TELA.blit(girar(NAVES_INIMIGAS[2]), (largura_nave_i3, altura_nave_i3))
         TELA.blit(girar(NAVES_INIMIGAS[3]), (largura_boss, altura_nave_b))
 
+        # Controle de Eventos de Mouse e Teclado
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -508,5 +520,6 @@ def tela_inicial():
                 if event.key == pygame.K_ESCAPE:
                     menu_principal()
         pygame.display.flip()
-    
+
+# INICIALIZANDO A APLICAÇÃO
 tela_inicial()
