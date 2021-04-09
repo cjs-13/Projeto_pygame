@@ -422,7 +422,9 @@ def ajuda():
     largura = LARGURA//2 - B_VOLTAR_largura//2
     altura_voltar = ALTURA
     
-    while True:
+    ajuda = True
+
+    while ajuda:
         RELOGIO.tick(FPS)
         TELA.blit(BG_AJUDA, (0, 0))
 
@@ -437,7 +439,7 @@ def ajuda():
                 exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    menu_principal()
+                    ajuda = False
             if event.type == pygame.MOUSEBUTTONDOWN:  # Monitora clique do mouse
                 x = pygame.mouse.get_pos()[0]
                 y = pygame.mouse.get_pos()[1]
