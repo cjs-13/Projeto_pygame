@@ -9,6 +9,7 @@ FPS = 60
 BRANCO = (255, 255, 255)
 SCALE_NAVE = (100, 90)
 SCALE_BOSS = (350, 280)
+SCALE_LABEL_HP = (297, 10)
 
 pygame.init()
 pygame.font.init()
@@ -45,14 +46,14 @@ B_VOLTAR = carrega_imagem("assets", "voltar.png")
 NAVE_PRINCIPAL = muda_escala(carrega_imagem("assets", "space_ship.png").convert_alpha(), SCALE_NAVE)
 LASER_PRINCIPAL = carrega_imagem("assets", "laser_principal.png").convert_alpha()
 NAVES_INIMIGAS = list()
-for i in range(1, 4):
+for i in range(1, 5):
     NAVES_INIMIGAS.append(muda_escala(carrega_imagem("assets", f"enemy_ship ({i}).png").convert_alpha(), SCALE_NAVE))
-for i in range(1, 2):
+for i in range(1, 3):
     NAVES_INIMIGAS.append(muda_escala(carrega_imagem("assets", f"boss_ship ({i}).png").convert_alpha(), SCALE_BOSS))
 LASER_RED = carrega_imagem("assets", "laser_red.png").convert_alpha()
 LASER_BLUE = carrega_imagem("assets", "laser_blue.png").convert_alpha()
 HP = list()
-HP.append(muda_escala(carrega_imagem("assets", "hp (1).png"), (297, 10)))
+HP.append(muda_escala(carrega_imagem("assets", "hp (1).png"), SCALE_LABEL_HP))
 HP.append(muda_escala(carrega_imagem("assets", "hp (2).png"), (280, 5)))
 BARRA_INF = muda_escala(carrega_imagem("assets", "barra.png"), (LARGURA, 40))
 BG = muda_escala(carrega_imagem("assets", "BG.png").convert(), (LARGURA, ALTURA + 40))
@@ -114,7 +115,6 @@ class Laser():
         if self.hp < 1:
             lasers.remove(self)
 
-
 class Nave():
     def __init__(self, x, y):
         self.x = x
@@ -139,6 +139,9 @@ class Nave():
 
     def draw(self, tela):
         tela.blit(self.nave_img, (int(self.x), int(self.y)))
+
+    def fora_tela(self):
+        return self.y <= 0 or self.y >= ALTURA
 
     def atirarinterno(self, arma, lasers):
         if self.cool_down_counter[arma] < 1:
@@ -184,11 +187,15 @@ class Nave():
             self.ai1_inimigo(lasers)
         elif self.ai == 2:
             self.ai2_inimigo(lasers)
+        elif self.ai == 3:
+            self.ai3_inimigo(lasers)
+        elif self.ai == 4:
+            self.ai4_boss(lasers)
 
     def ai0_inimigo(self, lasers):
         self.y += 1
         self.atirarinterno(0, lasers)
-        if self.fora_tela(ALTURA):
+        if self.fora_tela():
             self.hp = 0
 
     def ai1_inimigo(self, lasers):
@@ -210,6 +217,34 @@ class Nave():
         if self.cool_down_counter[0] == 0 and self.cool_down_counter[1] == 0:
             self.atirarinterno(1, lasers)
             self.atirarinterno(2, lasers)
+
+    def ai3_inimigo(self, lasers):
+        if self.x + self.largura() + 3 > LARGURA:
+            self.aihelper = 1
+        elif self.x - 3 < 0:
+            self.aihelper = 0
+        self.y += 1
+        if self.aihelper == 0:
+            self.x += 2
+        elif self.aihelper == 1:
+            self.x -= 2
+        self.atirarinterno(0, lasers)
+        if self.fora_tela():
+            self.hp = 0
+
+    def ai4_boss(self, lasers):
+        if self.x + self.largura() + 3 > LARGURA:
+            self.aihelper = 1
+        elif self.x - 3 < 0:
+            self.aihelper = 0
+        if self.aihelper == 0:
+            self.x += 2
+        elif self.aihelper == 1:
+            self.x -= 2
+        self.atirarinterno(0, lasers)
+        #self.atirarinterno(1, lasers)
+        #self.atirarinterno(2, lasers)
+        #self.atirarinterno(3, lasers)
 
 
 class Jogador(Nave):
@@ -234,10 +269,13 @@ class Jogador(Nave):
         self.arma_x[0] = 45
         self.arma_y[0] = 0
 
-    def draw_hp(self, tela):
+    def draw_hp(self, tela): # Desenha na tela os status de hp e vida do jogador
+        hp_label = FONT_PRINCIPAL.render("HP:", True, BRANCO)
+        lives_label = FONT_PRINCIPAL.render(f"Vidas: {self.lives - 1}", True, BRANCO)
         tela.blit(self.hp_img[0], (50, ALTURA + 15))
         tela.blit(muda_escala(self.hp_img[1], (28 * self.hp, 5)), (59, ALTURA + 18))
-
+        TELA.blit(hp_label, (7, ALTURA + 7))
+        tela.blit(lives_label, (SCALE_LABEL_HP[0] + 100, ALTURA + 7))
 
 class Inimigo(Nave):
     def __init__(self, x, y, ai):
@@ -268,21 +306,20 @@ class Inimigo(Nave):
         self.arma_y[1] = self.altura() - 30
         self.arma_y[2] = self.altura() - 30
 
-    def fora_tela(self, altura):
-        return self.y >= altura
-
-
 class Boss(Nave):
     def __init__(self, x, y, ai):
         super().__init__(x, y)
-        self.nave_img = NAVES_INIMIGAS[3]
+        self.nave_img = NAVES_INIMIGAS[ai]
         self.laser_img = LASER_BLUE
         self.mascara = pygame.mask.from_surface(self.nave_img)
         self.tipo = "Boss"
-        self.firerate = 60
         self.layer = 2
         self.damagetype = 2
         self.ai = ai
+        self.firerate[0] = 30
+        self.firerate[1] = 30
+        self.firerate[2] = 30
+        self.firerate[3] = 30
         self.laserhp[0] = 1
         self.laserhp[1] = 1
         self.laserhp[2] = 1
@@ -376,7 +413,7 @@ class Fase():
             self.wave += 1  # anda para a proxima onda
             self.counteracive = False  # desativa o contador
 
-    def faseid0(self, naves):  # a primeira fase
+    def faseid0(self, naves):  # a primeira fasedddda
 
         if self.wave == 0:  # onda 1
             self.wave_id0(naves)
@@ -412,15 +449,10 @@ def main():
     naves.append(jogador)
     lasers = list()
     fase = Fase()
-    hp_label = FONT_PRINCIPAL.render("HP:", True, BRANCO)
 
     while jogando:
         RELOGIO.tick(FPS)
         TELA.blit(BG, (0, 0))
-
-        # Spawn aleatório de inimigos
-        '''if len(naves) < 5:
-            fase.criar_inimigo(random.randint(5, 450), 0, random.randint(0, 2), naves)'''
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -431,7 +463,7 @@ def main():
                 if event.key == pygame.K_ESCAPE:
                     jogando = False
                 if event.key == pygame.K_u:
-                    fase.criar_inimigo(random.randint(5,450),0,random.randint(0,2) , naves)
+                    fase.criar_inimigo(random.randint(5,450),0,3, naves)
 
                 if event.key == pygame.K_l:
                     jogador.firerateup()
@@ -465,7 +497,6 @@ def main():
 
         TELA.blit(BARRA_INF, (0, ALTURA))
         jogador.draw_hp(TELA)
-        TELA.blit(hp_label, (7, ALTURA + 7))
 
         fase.direcionar_fase(naves)
         fase.counter_tick()
@@ -562,7 +593,7 @@ def tela_inicial():
     # Pegando a largura as imagens usadas na tela
     larg_nome = TEXTO.get_width()
     larg_nave_p = NAVE_PRINCIPAL.get_width()
-    larg_nave_boss = NAVES_INIMIGAS[3].get_width()
+    larg_nave_boss = NAVES_INIMIGAS[4].get_width()
 
     # Definindo a coordenada horizontal de início de cada imagem
     largura_nome = LARGURA//2 - larg_nome//2
@@ -580,7 +611,6 @@ def tela_inicial():
     altura_nave_i3 = ALTURA + 350
     altura_nave_b = ALTURA  + 400
 
-    
 
     def girar(imagem):
         return pygame.transform.rotate(imagem,180)
@@ -612,7 +642,7 @@ def tela_inicial():
         TELA.blit(girar(NAVES_INIMIGAS[0]), (int(largura_nave_i1), int(altura_nave_i1)))
         TELA.blit(girar(NAVES_INIMIGAS[1]), (largura_nave_i2, altura_nave_i2))
         TELA.blit(girar(NAVES_INIMIGAS[2]), (largura_nave_i3, altura_nave_i3))
-        TELA.blit(girar(NAVES_INIMIGAS[3]), (largura_boss, altura_nave_b))
+        TELA.blit(girar(NAVES_INIMIGAS[4]), (largura_boss, altura_nave_b))
 
         # Controle de Eventos de Mouse e Teclado
         for event in pygame.event.get():
