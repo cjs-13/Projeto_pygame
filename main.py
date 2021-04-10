@@ -219,6 +219,8 @@ class Nave():
             self.atirarinterno(2, lasers)
 
     def ai3_inimigo(self, lasers):
+        if self.y == 0:
+            self.aihelper = random.randint(0,1)
         if self.x + self.largura() + 3 > LARGURA:
             self.aihelper = 1
         elif self.x - 3 < 0:
@@ -241,11 +243,10 @@ class Nave():
             self.x += 2
         elif self.aihelper == 1:
             self.x -= 2
-        self.atirarinterno(0, lasers)
+        #self.atirarinterno(0, lasers)
         #self.atirarinterno(1, lasers)
         #self.atirarinterno(2, lasers)
         #self.atirarinterno(3, lasers)
-
 
 class Jogador(Nave):
     def __init__(self, x, y):
@@ -268,6 +269,14 @@ class Jogador(Nave):
         self.laservel_y[0] = -7
         self.arma_x[0] = 45
         self.arma_y[0] = 0
+
+    def colisao(self, naves): # Testa a colisao do player com as naves
+        for nave in naves:
+            if self.layer != nave.layer and testa_colisao(self, nave):
+                nave.hp -= 1
+                if self.imunity_timer == 0:
+                    self.hp -= 1
+                    self.imunity_timer = 5
 
     def draw_hp(self, tela): # Desenha na tela os status de hp e vida do jogador
         hp_label = FONT_PRINCIPAL.render("HP:", True, BRANCO)
@@ -483,6 +492,7 @@ def main():
         if keys[pygame.K_SPACE]:
             jogador.atirarinterno(0, lasers)
 
+        jogador.colisao(naves)
         for laser in lasers:
             laser.moverlaserinterno(lasers)
             laser.colisaointerno(naves, lasers)
