@@ -48,7 +48,7 @@ LASER_PRINCIPAL = carrega_imagem("assets", "laser_principal.png").convert_alpha(
 NAVES_INIMIGAS = list()
 for i in range(1, 5):
     NAVES_INIMIGAS.append(muda_escala(carrega_imagem("assets", f"enemy_ship ({i}).png").convert_alpha(), SCALE_NAVE))
-for i in range(1, 3):
+for i in range(1, 2):
     NAVES_INIMIGAS.append(muda_escala(carrega_imagem("assets", f"boss_ship ({i}).png").convert_alpha(), SCALE_BOSS))
 LASER_RED = carrega_imagem("assets", "laser_red.png").convert_alpha()
 LASER_BLUE = carrega_imagem("assets", "laser_blue.png").convert_alpha()
@@ -220,7 +220,7 @@ class Nave():
 
     def ai3_inimigo(self, lasers):
         if self.y == 0:
-            self.aihelper = random.randint(0,1)
+            self.aihelper = random.randint(0, 1)
         if self.x + self.largura() + 3 > LARGURA:
             self.aihelper = 1
         elif self.x - 3 < 0:
@@ -235,18 +235,19 @@ class Nave():
             self.hp = 0
 
     def ai4_boss(self, lasers):
-        if self.x + self.largura() + 3 > LARGURA:
+        if self.x + self.largura() + 0.5 > LARGURA:
             self.aihelper = 1
-        elif self.x - 3 < 0:
+        elif self.x - 0.5 < 0:
             self.aihelper = 0
         if self.aihelper == 0:
-            self.x += 2
+            self.x += 0.5
         elif self.aihelper == 1:
-            self.x -= 2
-        #self.atirarinterno(0, lasers)
-        #self.atirarinterno(1, lasers)
-        #self.atirarinterno(2, lasers)
-        #self.atirarinterno(3, lasers)
+            self.x -= 0.5
+        self.atirarinterno(1, lasers)
+        self.atirarinterno(2, lasers)
+        if self.hp <= 50:
+            self.atirarinterno(0, lasers)
+            self.atirarinterno(3, lasers)
 
 class Jogador(Nave):
     def __init__(self, x, y):
@@ -325,10 +326,10 @@ class Boss(Nave):
         self.layer = 2
         self.damagetype = 2
         self.ai = ai
-        self.firerate[0] = 30
-        self.firerate[1] = 30
-        self.firerate[2] = 30
-        self.firerate[3] = 30
+        self.firerate[0] = 90
+        self.firerate[1] = 60
+        self.firerate[2] = 60
+        self.firerate[3] = 90
         self.laserhp[0] = 1
         self.laserhp[1] = 1
         self.laserhp[2] = 1
@@ -342,14 +343,14 @@ class Boss(Nave):
         self.laservel_y[2] = 7
         self.laservel_y[3] = 7
         self.hp = 100
-        self.arma_x[0] = self.x + 40
-        self.arma_x[1] = self.x + 40
-        self.arma_x[2] = self.x + 40
-        self.arma_x[3] = self.x + 40
-        self.arma_y[0] = self.y - 80
-        self.arma_y[1] = self.y - 80
-        self.arma_y[2] = self.y - 80
-        self.arma_y[3] = self.y - 80
+        self.arma_x[0] = self.largura()//2 - 5 - 62
+        self.arma_x[1] = self.largura()//2 - 5 - 38
+        self.arma_x[2] = self.largura()//2 - 5 + 38
+        self.arma_x[3] = self.largura()//2 - 5 + 62
+        self.arma_y[0] = self.altura() - 160
+        self.arma_y[1] = self.altura() - 90
+        self.arma_y[2] = self.altura() - 90
+        self.arma_y[3] = self.altura() - 160
 
 
 class Fase():
