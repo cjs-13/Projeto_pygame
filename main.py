@@ -1,4 +1,4 @@
-import pygame
+import pygame as pg
 import random
 import os
 from sys import exit
@@ -11,60 +11,62 @@ SCALE_NAVE = (100, 90)
 SCALE_BOSS = (350, 280)
 SCALE_LABEL_HP = (297, 10)
 
-pygame.init()
-pygame.font.init()
-FONT_PRINCIPAL = pygame.font.SysFont("Letter Gothic", 35)
-TELA = pygame.display.set_mode((LARGURA, ALTURA + 40))
-RELOGIO = pygame.time.Clock()
+pg.init()
+pg.font.init()
+FONT_PRINCIPAL = pg.font.SysFont("Letter Gothic", 35)
+TELA = pg.display.set_mode((LARGURA, ALTURA + 40))
+RELOGIO = pg.time.Clock()
 
 # FUNÇÕES PARA TORNAR O CÓDIGO MENOS VERBOSO
 
 
-def carrega_imagem(caminho, nome_imagem):
-    return pygame.image.load(os.path.join(caminho, nome_imagem))
+def load_img(caminho, nome_imagem):
+    return pg.image.load(os.path.join(caminho, nome_imagem))
 
 
-def muda_escala(imagem, escala):
-    return pygame.transform.scale(imagem, escala)
+def ch_scale(imagem, escala):
+    return pg.transform.scale(imagem, escala)
+
+dir = "assets"
 
 # CARREGANDO IMAGENS
 
 # Tela inicial e Menu Principal
 
 
-TEXTO = carrega_imagem("assets", "nome.png").convert_alpha()
-BG_INICIO = carrega_imagem("assets", "fundo.png")
-B_INICIAR = carrega_imagem("assets", "iniciar.png")
-B_AJUDA = carrega_imagem("assets", "ajuda.png")
-B_SAIR = carrega_imagem("assets", "sair.png")
+TEXTO = load_img(dir, "nome.png").convert_alpha()
+BG_INICIO = load_img(dir, "fundo.png")
+B_INICIAR = load_img(dir, "iniciar.png")
+B_AJUDA = load_img(dir, "ajuda.png")
+B_SAIR = load_img(dir, "sair.png")
 
 # Tela de ajuda
-BG_AJUDA = muda_escala(carrega_imagem("assets", "BG_ajuda.png").convert(), (LARGURA, ALTURA + 40))
-B_VOLTAR = carrega_imagem("assets", "voltar.png")
+BG_AJUDA = ch_scale(load_img(dir, "BG_ajuda.png").convert(), (LARGURA, ALTURA + 40))
+B_VOLTAR = load_img(dir, "voltar.png")
 
 # Telas das fases do jogo
-NAVE_PRINCIPAL = muda_escala(carrega_imagem("assets", "space_ship.png").convert_alpha(), SCALE_NAVE)
-LASER_PRINCIPAL = carrega_imagem("assets", "laser_principal.png").convert_alpha()
+NAVE_PRINCIPAL = ch_scale(load_img(dir, "space_ship.png").convert_alpha(), SCALE_NAVE)
+LASER_PRINCIPAL = load_img(dir, "laser_principal.png").convert_alpha()
 NAVES_INIMIGAS = list()
 for i in range(1, 5):
-    NAVES_INIMIGAS.append(muda_escala(carrega_imagem("assets", f"enemy_ship ({i}).png").convert_alpha(), SCALE_NAVE))
+    NAVES_INIMIGAS.append(ch_scale(load_img(dir, f"enemy_ship ({i}).png").convert_alpha(), SCALE_NAVE))
 for i in range(1, 2):
-    NAVES_INIMIGAS.append(muda_escala(carrega_imagem("assets", f"boss_ship ({i}).png").convert_alpha(), SCALE_BOSS))
-LASER_RED = carrega_imagem("assets", "laser_red.png").convert_alpha()
-LASER_BLUE = carrega_imagem("assets", "laser_blue.png").convert_alpha()
+    NAVES_INIMIGAS.append(ch_scale(load_img(dir, f"boss_ship ({i}).png").convert_alpha(), SCALE_BOSS))
+LASER_RED = load_img(dir, "laser_red.png").convert_alpha()
+LASER_BLUE = load_img(dir, "laser_blue.png").convert_alpha()
 HP = list()
-HP.append(muda_escala(carrega_imagem("assets", "hp (1).png"), SCALE_LABEL_HP))
-HP.append(muda_escala(carrega_imagem("assets", "hp (2).png"), (280, 5)))
-BARRA_INF = muda_escala(carrega_imagem("assets", "barra.png"), (LARGURA, 40))
-BG = muda_escala(carrega_imagem("assets", "BG.png").convert(), (LARGURA, ALTURA + 40))
+HP.append(ch_scale(load_img(dir, "hp (1).png"), SCALE_LABEL_HP))
+HP.append(ch_scale(load_img(dir, "hp (2).png"), (280, 5)))
+BARRA_INF = ch_scale(load_img(dir, "barra.png"), (LARGURA, 40))
+BG = ch_scale(load_img(dir, "BG.png").convert(), (LARGURA, ALTURA + 40))
 
 # Icone do Jogo
-ICONE = carrega_imagem("assets", "space_ship.png")
+ICONE = load_img(dir, "space_ship.png")
 
 # ADIÇÃO DE NOME E ICONE À JANELA DO JOGO
 
-pygame.display.set_caption("__Invasores do Espaço__")
-pygame.display.set_icon(ICONE)
+pg.display.set_caption("__Invasores do Espaço__")
+pg.display.set_icon(ICONE)
 
 # DEFINIÇÃO DAS CLASSES
 
@@ -74,7 +76,7 @@ class Laser():
         self.x = x + nave.arma_x[arma]
         self.y = y + nave.arma_y[arma]
         self.img = img
-        self.mascara = pygame.mask.from_surface(self.img)
+        self.mascara = pg.mask.from_surface(self.img)
         self.nave = nave
         self.damagetype = nave.layer
         self.vel_x = nave.laservel_x[arma]
@@ -255,7 +257,7 @@ class Jogador(Nave):
         self.nave_img = NAVE_PRINCIPAL
         self.laser_img = LASER_PRINCIPAL
         self.hp_img = HP
-        self.mascara = pygame.mask.from_surface(self.nave_img)
+        self.mascara = pg.mask.from_surface(self.nave_img)
         self.tipo = "Jogador"
         self.pontos = 0
         self.layer = 1
@@ -283,7 +285,7 @@ class Jogador(Nave):
         hp_label = FONT_PRINCIPAL.render("HP:", True, BRANCO)
         lives_label = FONT_PRINCIPAL.render(f"Vidas: {self.lives - 1}", True, BRANCO)
         tela.blit(self.hp_img[0], (50, ALTURA + 15))
-        tela.blit(muda_escala(self.hp_img[1], (28 * self.hp, 5)), (59, ALTURA + 18))
+        tela.blit(ch_scale(self.hp_img[1], (28 * self.hp, 5)), (59, ALTURA + 18))
         TELA.blit(hp_label, (7, ALTURA + 7))
         tela.blit(lives_label, (SCALE_LABEL_HP[0] + 100, ALTURA + 7))
 
@@ -292,7 +294,7 @@ class Inimigo(Nave):
         super().__init__(x, y)
         self.nave_img = NAVES_INIMIGAS[ai]
         self.laser_img = LASER_RED
-        self.mascara = pygame.mask.from_surface(self.nave_img)
+        self.mascara = pg.mask.from_surface(self.nave_img)
         self.tipo = "Inimigo"
         self.layer = 2
         self.damagetype = 2
@@ -321,7 +323,7 @@ class Boss(Nave):
         super().__init__(x, y)
         self.nave_img = NAVES_INIMIGAS[ai]
         self.laser_img = LASER_BLUE
-        self.mascara = pygame.mask.from_surface(self.nave_img)
+        self.mascara = pg.mask.from_surface(self.nave_img)
         self.tipo = "Boss"
         self.layer = 2
         self.damagetype = 2
@@ -464,33 +466,33 @@ def main():
         RELOGIO.tick(FPS)
         TELA.blit(BG, (0, 0))
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
                 jogando = False
-                pygame.quit()
+                pg.quit()
                 exit()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_ESCAPE:
                     jogando = False
-                if event.key == pygame.K_u:
+                if event.key == pg.K_u:
                     fase.criar_inimigo(random.randint(5,450),0,3, naves)
 
-                if event.key == pygame.K_l:
+                if event.key == pg.K_l:
                     jogador.firerateup()
 
-                if event.key == pygame.K_k:
+                if event.key == pg.K_k:
                     fase.pular_fase()
 
-        keys = pygame.key.get_pressed()
-        if (keys[pygame.K_a] or keys[pygame.K_LEFT]) and jogador.x - jogador_vel > 0:
+        keys = pg.key.get_pressed()
+        if (keys[pg.K_a] or keys[pg.K_LEFT]) and jogador.x - jogador_vel > 0:
             jogador.x -= jogador_vel
-        if (keys[pygame.K_d] or keys[pygame.K_RIGHT]) and jogador.x + jogador_vel + jogador.largura() < LARGURA:
+        if (keys[pg.K_d] or keys[pg.K_RIGHT]) and jogador.x + jogador_vel + jogador.largura() < LARGURA:
             jogador.x += jogador_vel
-        if (keys[pygame.K_w] or keys[pygame.K_UP]) and jogador.y - jogador_vel > 0:
+        if (keys[pg.K_w] or keys[pg.K_UP]) and jogador.y - jogador_vel > 0:
             jogador.y -= jogador_vel
-        if (keys[pygame.K_s] or keys[pygame.K_DOWN]) and jogador.y + jogador_vel + jogador.altura() < ALTURA:
+        if (keys[pg.K_s] or keys[pg.K_DOWN]) and jogador.y + jogador_vel + jogador.altura() < ALTURA:
             jogador.y += jogador_vel
-        if keys[pygame.K_SPACE]:
+        if keys[pg.K_SPACE]:
             jogador.atirarinterno(0, lasers)
 
         jogador.colisao(naves)
@@ -512,7 +514,7 @@ def main():
         fase.direcionar_fase(naves)
         fase.counter_tick()
 
-        pygame.display.flip()
+        pg.display.flip()
 
 def menu_principal():
     # Pegando a largura as imagens usadas na tela
@@ -546,22 +548,22 @@ def menu_principal():
         TELA.blit(B_SAIR, (largura_geral, altura_sair))
        
         # Controle de Eventos de Mouse e Teclado
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                pg.quit()
                 exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                x = pygame.mouse.get_pos()[0]
-                y = pygame.mouse.get_pos()[1]
+            if event.type == pg.MOUSEBUTTONDOWN:
+                x = pg.mouse.get_pos()[0]
+                y = pg.mouse.get_pos()[1]
                 if 139 < x < 414 and 256 < y < 289:
                     main()
                 if 139 < x < 414 and 352 < y < 395:
                     ajuda()
                 if 139 < x < 414 and 449 < y < 484:
-                    pygame.quit()
+                    pg.quit()
                     exit()
 
-        pygame.display.flip()
+        pg.display.flip()
 
 def ajuda():
     # Pegando a largura as imagens usadas na tela
@@ -586,19 +588,19 @@ def ajuda():
         TELA.blit(B_VOLTAR, (largura, altura_voltar))
         
         # Controle de Eventos de Mouse e Teclado
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                pg.quit()
                 exit()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_ESCAPE:
                     ajuda = False
-            if event.type == pygame.MOUSEBUTTONDOWN:  # Monitora clique do mouse
-                x = pygame.mouse.get_pos()[0]
-                y = pygame.mouse.get_pos()[1]               
+            if event.type == pg.MOUSEBUTTONDOWN:  # Monitora clique do mouse
+                x = pg.mouse.get_pos()[0]
+                y = pg.mouse.get_pos()[1]               
                 if 123 < x < 414 and 515 < y < 552:
                     menu_principal()
-        pygame.display.flip()
+        pg.display.flip()
 
 def tela_inicial():
     # Pegando a largura as imagens usadas na tela
@@ -624,7 +626,7 @@ def tela_inicial():
 
 
     def girar(imagem):
-        return pygame.transform.rotate(imagem,180)
+        return pg.transform.rotate(imagem,180)
 
     naves_passando = True
     while naves_passando:
@@ -656,14 +658,14 @@ def tela_inicial():
         TELA.blit(girar(NAVES_INIMIGAS[4]), (largura_boss, altura_nave_b))
 
         # Controle de Eventos de Mouse e Teclado
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                pg.quit()
                 exit()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_ESCAPE:
                     menu_principal()
-        pygame.display.flip()
+        pg.display.flip()
 
 # INICIALIZANDO A APLICAÇÃO
 tela_inicial()
