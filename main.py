@@ -103,7 +103,7 @@ class Laser():
         self.x += self.vel_x
         self.y += self.vel_y
         if self.fora_tela():
-            lasers.remove(self)
+            self.hp = 0
 
     def colisaointerno(self, naves, lasers):
         for nave in naves:
@@ -161,12 +161,6 @@ class Nave():
         if self.imunity_timer > 0:
             self.imunity_timer -= 1
 
-    def firerateup(self):
-        if self.firerate[0] >= 2:
-            self.firerate[0] -= 1
-
-    def fireratedown(self):
-        self.firerate[0] += 1
 
     def largura(self):
         return self.nave_img.get_width()
@@ -177,6 +171,11 @@ class Nave():
     def testevida(self, naves):
         if self.hp < 1 and self.lives < 2:
             naves.remove(self)
+            if self.tipo == "Inimigo":
+                jogador = naves[0]
+                jogador.pontos += 10
+                naves[0] = jogador
+
         elif self.hp < 1 and self.lives > 1:
             self.lives -= 1
             self.hp = self.max_hp
@@ -288,8 +287,8 @@ class Jogador(Nave):
         tela.blit(self.hp_img[0], (40, ALTURA + 15))
         tela.blit(ch_scale(self.hp_img[1], (28 * self.hp, 5)), (49, ALTURA + 18))
         tela.blit(hp_label, (7, ALTURA + 11))
-        tela.blit(lives_label, (SCALE_LABEL_HP[0] + 50, ALTURA + 9))
-        tela.blit(pontos, (SCALE_LABEL_HP[0] + 150 , ALTURA + 9))
+        tela.blit(lives_label, (SCALE_LABEL_HP[0] + 40, ALTURA + 9))
+        tela.blit(pontos, (SCALE_LABEL_HP[0] + 120, ALTURA + 9))
 
 class Inimigo(Nave):
     def __init__(self, x, y, ai):
