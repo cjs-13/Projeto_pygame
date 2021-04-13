@@ -13,7 +13,7 @@ SCALE_LABEL_HP = (297, 10)
 
 pg.init()
 pg.font.init()
-FONT_PRINCIPAL = pg.font.SysFont("Letter Gothic", 35)
+FONT_PRINCIPAL = pg.font.SysFont("Letter Gothic", 30)
 TELA = pg.display.set_mode((LARGURA, ALTURA + 40))
 RELOGIO = pg.time.Clock()
 
@@ -284,10 +284,12 @@ class Jogador(Nave):
     def draw_hp(self, tela): # Desenha na tela os status de hp e vida do jogador
         hp_label = FONT_PRINCIPAL.render("HP:", True, BRANCO)
         lives_label = FONT_PRINCIPAL.render(f"Vidas: {self.lives - 1}", True, BRANCO)
-        tela.blit(self.hp_img[0], (50, ALTURA + 15))
-        tela.blit(ch_scale(self.hp_img[1], (28 * self.hp, 5)), (59, ALTURA + 18))
-        TELA.blit(hp_label, (7, ALTURA + 7))
-        tela.blit(lives_label, (SCALE_LABEL_HP[0] + 100, ALTURA + 7))
+        pontos = FONT_PRINCIPAL.render(f"Pontos: {self.pontos}", True, BRANCO)
+        tela.blit(self.hp_img[0], (40, ALTURA + 15))
+        tela.blit(ch_scale(self.hp_img[1], (28 * self.hp, 5)), (49, ALTURA + 18))
+        tela.blit(hp_label, (7, ALTURA + 11))
+        tela.blit(lives_label, (SCALE_LABEL_HP[0] + 50, ALTURA + 9))
+        tela.blit(pontos, (SCALE_LABEL_HP[0] + 150 , ALTURA + 9))
 
 class Inimigo(Nave):
     def __init__(self, x, y, ai):
