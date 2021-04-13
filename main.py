@@ -143,7 +143,7 @@ class Nave():
         tela.blit(self.nave_img, (int(self.x), int(self.y)))
 
     def fora_tela(self):
-        return self.y <= 0 or self.y >= ALTURA
+        return self.y <= 0 or self.y >= ALTURA or self.x <= 0 - self.largura() or self.x >= LARGURA + self.largura()
 
     def atirarinterno(self, arma, lasers):
         if self.cool_down_counter[arma] < 1:
@@ -171,10 +171,12 @@ class Nave():
     def testevida(self, naves):
         if self.hp < 1 and self.lives < 2:
             naves.remove(self)
-            if self.tipo == "Inimigo":
-                jogador = naves[0]
-                jogador.pontos += 10
-                naves[0] = jogador
+            if self.tipo == "Inimigo" and self.fora_tela() is not True:
+                if naves[0] is not None:
+                    jogador = naves[0]
+                    if jogador.tipo == "Jogador":
+                        jogador.pontos += 10
+                        naves[0] = jogador
 
         elif self.hp < 1 and self.lives > 1:
             self.lives -= 1
@@ -200,24 +202,28 @@ class Nave():
             self.hp = 0
 
     def ai1_inimigo(self, lasers):
-        if self.y < 80:
-            self.y += 2
+        self.y += 1
+        if self.aihelper < 0 and (self.x + 104 < LARGURA or self.y > 80):
+            self.x -= (self.y // 20) -4
+        elif self.aihelper > 0 and (self.x - 4 > 0 or self.y > 80):
+            self.x += (self.y // 20) -4
         if self.aihelper == 0:
-            self.x += 3
-        elif self.aihelper == 1:
-            self.x -= 3
+            if self.x >= ALTURA // 2:
+                self.aihelper = -1
+            elif self.x < ALTURA // 2:
+                self.aihelper = 1
         self.atirarinterno(0, lasers)
-        if self.x < 5:
-            self.aihelper = 0
-        elif self.x > ALTURA - 100:
-            self.aihelper = 1
+        if self.fora_tela():
+            self.hp = 0
+
 
     def ai2_inimigo(self, lasers):
         if self.y < 20:
             self.y += 2
-        if self.cool_down_counter[0] == 0 and self.cool_down_counter[1] == 0:
-            self.atirarinterno(1, lasers)
-            self.atirarinterno(2, lasers)
+        self.atirarinterno(1, lasers)
+        self.atirarinterno(2, lasers)
+        if self.fora_tela():
+            self.hp = 0
 
     def ai3_inimigo(self, lasers):
         if self.y == 0:
@@ -363,6 +369,7 @@ class Fase():
         self.counter = -1
         self.counteracive = True
         self.dificuty = 1
+        self.wave_randomid = [0, 0, 0]
 
     def pular_onda(self):
         self.counter = -1
@@ -390,6 +397,14 @@ class Fase():
     def counter_tick(self):
         if self.counteracive:  # anda o contador se ele estiver ativo
             self.counter += 1
+
+    def wave_random(self, type, naves):
+        if self.wave_randomid[type] == 0:
+            self.wave_id0(naves)
+        elif self.wave_randomid[type] == 1:
+            self.wave_id1(naves)
+        elif self.wave_randomid[type] == 2:
+            self.wave_id2(naves)
 
     def wave_id0(self, naves):  # onda de id 0, spawna inimigos e uma formação de / \
         if self.counter % (120 / self.dificuty) != 0:
@@ -426,7 +441,27 @@ class Fase():
             self.wave += 1  # anda para a proxima onda
             self.counteracive = False  # desativa o contador
 
-    def faseid0(self, naves):  # a primeira fasedddda
+    def wave_id2(self, naves):
+        if self.counter % (120 / self.dificuty) != 0:
+            self.counteracive = True
+        elif self.counter == 0:  # spawna inimigos quando o counter e igual a 0
+            self.criar_inimigo(5, 0, 1, naves)
+            self.criar_inimigo(450, 0, 1, naves)
+        elif self.counter == 120 / self.dificuty:  # spawna inimigos quando o counter e igual a 120 na dificuldade 1
+            self.criar_inimigo(5, 0, 1, naves)
+            self.criar_inimigo(450, 0, 1, naves)
+        elif self.counter == 240 / self.dificuty:  # spawna inimigos quando o counter e igual a 240 na dificuldade 1
+            self.criar_inimigo(5, 0, 1, naves)
+            self.criar_inimigo(450, 0, 1, naves)
+        elif self.counter == 360 / self.dificuty:  # spawna inimigos quando o counter e igual a 360 na dificuldade 1
+            self.criar_inimigo(5, 0, 1, naves)
+            self.criar_inimigo(450, 0, 1, naves)
+        elif self.counter == 480 / self.dificuty:  # termina a onda quando o counter e igual a 480 na dificuldade 1
+            self.counter = -1  # reseta o contador
+            self.wave += 1  # anda para a proxima onda
+            self.counteracive = False  # desativa o contador
+
+    def faseid0(self, naves):  # a primeira fase
 
         if self.wave == 0:  # onda 1
             self.wave_id0(naves)
@@ -443,8 +478,57 @@ class Fase():
         elif self.wave == 2:
             self.wave_id1(naves)
 
+        elif self.wave == 3 and self.counteracive is False:
+            self.counteracive = True
+
         elif self.wave == 3:
+            self.wave_id2(naves)
+
+        elif self.wave == 4 and self.counteracive is False:
+            self.wave_randomid[0] = random.randint(0, 2)
+            self.counteracive = True
+
+        elif self.wave == 4:
+            self.wave_random(0, naves)
+
+        elif self.wave == 5 and self.counteracive is False:
+            self.wave_randomid[0] = random.randint(0, 2)
+            self.counteracive = True
+
+        elif self.wave == 5:
+            self.wave_random(0, naves)
+
+        elif self.wave == 6 and self.counteracive is False:
+            self.wave_randomid[0] = random.randint(0, 2)
+            self.counteracive = True
+
+        elif self.wave == 6:
+            self.wave_random(0, naves)
+
+        elif self.wave == 7 and self.counteracive is False:
+            self.wave_randomid[0] = random.randint(0, 2)
+            self.counteracive = True
+
+        elif self.wave == 7:
+            self.wave_random(0, naves)
+
+        elif self.wave == 8 and self.counteracive is False:
+            self.wave_randomid[0] = random.randint(0, 2)
+            self.counteracive = True
+
+        elif self.wave == 8:
+            self.wave_random(0, naves)
+
+        elif self.wave == 9 and self.counteracive is False:
+            self.wave_randomid[0] = random.randint(0, 2)
+            self.counteracive = True
+
+        elif self.wave == 9:
+            self.wave_random(0, naves)
+
+        elif self.wave == 10:
             self.pular_fase()
+            self.fase = 0
 
 def testa_colisao(obj1, obj2):
     # obj1 == Laser, obj2 == Nave atingida
@@ -476,7 +560,7 @@ def main():
                 if event.key == pg.K_ESCAPE:
                     jogando = False
                 if event.key == pg.K_u:
-                    fase.criar_inimigo(random.randint(5,450),0,3, naves)
+                    fase.criar_inimigo(random.randint(5,450),0,random.randint(0,3), naves)
 
                 if event.key == pg.K_l:
                     jogador.firerateup()
@@ -502,6 +586,9 @@ def main():
             laser.colisaointerno(naves, lasers)
             laser.testevida(lasers)
             laser.drawinterno(TELA)
+
+        if jogador.hp <= 0 and jogador.lives < 2:
+            jogando = False
 
         for nave in naves:
             nave.reduzirtimers()
