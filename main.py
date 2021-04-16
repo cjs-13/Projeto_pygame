@@ -33,7 +33,7 @@ dir = "assets"
 
 # Tela inicial e Menu Principal
 TEXTO = load_img(dir, "nome.png").convert_alpha()
-BG_INICIO = load_img(dir, "fundo.png")
+BG_INICIO = ch_scale(load_img(dir, "fundo.png"),(LARGURA, ALTURA + 40))
 B_INICIAR = load_img(dir, "iniciar.png")
 B_AJUDA = load_img(dir, "ajuda.png")
 B_SAIR = load_img(dir, "sair.png")
