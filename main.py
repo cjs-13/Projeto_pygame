@@ -13,7 +13,7 @@ SCALE_LABEL_HP = (297, 10)
 
 pg.init()
 pg.font.init()
-FONT_PRINCIPAL = pg.font.SysFont("Letter Gothic", 30)
+FONT_PRINCIPAL = pg.font.SysFont("Letter Gothic", 25)
 TELA = pg.display.set_mode((LARGURA, ALTURA + 40))
 RELOGIO = pg.time.Clock()
 
@@ -112,6 +112,11 @@ class Laser():
                 if nave.imunity_timer == 0:
                     nave.hp -= 1
                     nave.imunity_timer = 5
+    
+    def ColisaoLaser(self,lasers):
+        for laser in lasers:
+            if self.damagetype != laser.damagetype and testa_colisao(self,laser):
+                self.hp -= 1
 
     def testevida(self, lasers):
         if self.hp < 1:
@@ -293,8 +298,8 @@ class Jogador(Nave):
         tela.blit(self.hp_img[0], (40, ALTURA + 15))
         tela.blit(ch_scale(self.hp_img[1], (28 * self.hp, 5)), (49, ALTURA + 18))
         tela.blit(hp_label, (7, ALTURA + 11))
-        tela.blit(lives_label, (SCALE_LABEL_HP[0] + 40, ALTURA + 9))
-        tela.blit(pontos, (SCALE_LABEL_HP[0] + 120, ALTURA + 9))
+        tela.blit(lives_label, (SCALE_LABEL_HP[0] + 60, ALTURA + 11))
+        tela.blit(pontos, (SCALE_LABEL_HP[0] + 140, ALTURA + 11))
 
 class Inimigo(Nave):
     def __init__(self, x, y, ai):
@@ -586,6 +591,7 @@ def main():
             laser.colisaointerno(naves, lasers)
             laser.testevida(lasers)
             laser.drawinterno(TELA)
+            laser.ColisaoLaser(lasers)
 
         if jogador.hp <= 0 and jogador.lives < 2:
             jogando = False
