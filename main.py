@@ -93,9 +93,6 @@ class Laser():
     def fora_tela(self):
         return (self.y <= 0 or self.y >= ALTURA) or (self.x <= 0 or self.x >= LARGURA)
 
-    def colisao(self, obj):
-        return testa_colisao(self, obj)
-
     def largura(self):
         return self.img.get_width()
 
@@ -110,15 +107,15 @@ class Laser():
 
     def colisaointerno(self, naves, lasers):
         for nave in naves:
-            if nave.layer != self.damagetype and self.colisao(nave):
+            if nave.layer != self.damagetype and testa_colisao(self, nave):
                 self.hp -= 1
                 if nave.imunity_timer == 0:
                     nave.hp -= 1
                     nave.imunity_timer = 5
     
-    def ColisaoLaser(self,lasers):
+    def ColisaoLaser(self, lasers):
         for laser in lasers:
-            if self.damagetype != laser.damagetype and testa_colisao(self,laser):
+            if self.damagetype != laser.damagetype and testa_colisao(self, laser):
                 self.hp -= 1
 
     def testevida(self, lasers):
@@ -250,19 +247,22 @@ class Nave():
             self.hp = 0
 
     def ai4_boss(self, lasers):
-        if self.x + self.largura() + 0.5 > LARGURA:
-            self.aihelper = 1
-        elif self.x - 0.5 < 0:
-            self.aihelper = 0
-        if self.aihelper == 0:
-            self.x += 0.5
-        elif self.aihelper == 1:
-            self.x -= 0.5
-        self.atirarinterno(1, lasers)
-        self.atirarinterno(2, lasers)
-        if self.hp <= 50:
-            self.atirarinterno(0, lasers)
-            self.atirarinterno(3, lasers)
+        if self.y + 2 < 10: # Animacao de entrada
+            self.y += 2
+        else:
+            if self.x + self.largura() + 0.5 > LARGURA:
+                self.aihelper = 1
+            elif self.x - 0.5 < 0:
+                self.aihelper = 0
+            if self.aihelper == 0:
+                self.x += 0.5
+            elif self.aihelper == 1:
+                self.x -= 0.5
+            self.atirarinterno(1, lasers)
+            self.atirarinterno(2, lasers)
+            if self.hp <= 50:
+                self.atirarinterno(0, lasers)
+                self.atirarinterno(3, lasers)
 
 class Jogador(Nave):
     def __init__(self, x, y):
@@ -468,6 +468,18 @@ class Fase():
             self.wave += 1  # anda para a proxima onda
             self.counteracive = False  # desativa o contador
 
+    def wave_boss(self, naves): # Spawna nave do boss hp multiplicado pela dificudade da fase
+        if self.counter % (120 / self.dificuty) != 0:
+            self.counteracive = True
+        elif self.counter == 0:
+            boss = Boss(LARGURA//2 - SCALE_BOSS[0]//2, -SCALE_BOSS[1], 4)
+            boss.hp *= self.dificuty
+            naves.append(boss)
+        elif len(naves) < 2:
+            self.counter = -1
+            self.wave += 1
+            self.counteracive = False
+
     def faseid0(self, naves):  # a primeira fase
 
         if self.wave == 0:  # onda 1
@@ -533,7 +545,13 @@ class Fase():
         elif self.wave == 9:
             self.wave_random(0, naves)
 
+        elif self.wave == 10 and self.counteracive is False:
+            self.sem_inimigos(naves)
+
         elif self.wave == 10:
+            self.wave_boss(naves)
+
+        elif self.wave == 11:
             self.pular_fase()
             self.fase = 0
 
