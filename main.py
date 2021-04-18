@@ -64,7 +64,7 @@ BARRA_INF = ch_scale(load_img(dir, "barra.png"), (LARGURA, 40))
 BG = ch_scale(load_img(dir, "BG.png").convert(), (LARGURA, ALTURA + 40))
 
 # Icone do Jogo
-ICONE = load_img(dir, "space_ship.png")
+ICONE = load_img(dir, "windows_icon.png")
 
 # ADIÇÃO DE NOME E ICONE À JANELA DO JOGO
 
