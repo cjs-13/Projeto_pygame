@@ -586,10 +586,17 @@ def main():
                 jogando = False
                 pg.quit()
                 exit()
+                
+            if event.type == pg.MOUSEBUTTONDOWN:
+                tela_pause()
+
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_ESCAPE:
                     jogando = False
                     menu_principal()
+                if event.key == pg.K_p:
+                    tela_pause()
+
                 if event.key == pg.K_u:
                     fase.criar_inimigo(random.randint(5,450),0,random.randint(0,3), naves)
 
@@ -598,8 +605,6 @@ def main():
 
                 if event.key == pg.K_k:
                     fase.pular_fase()
-            if event.type == pg.MOUSEBUTTONDOWN:
-                tela_pause()
 
         keys = pg.key.get_pressed()
         if (keys[pg.K_a] or keys[pg.K_LEFT]) and jogador.x - jogador_vel > 0:
@@ -795,9 +800,65 @@ def tela_inicial():
         pg.display.flip()
 
 def tela_pause():
-    pass
+    # Pegando a largura as imagens usadas na tela
+    larg_nome = TEXTO_PAUSA.get_width()
+    B_CONTINUAR_largura = B_INICIAR.get_width()
+     
+    # Definindo a coordenada horizontal de início da imagem
+    largura_nome = LARGURA//2 - larg_nome//2
+    largura_geral = LARGURA//2 - B_CONTINUAR_largura//2
+
+    # Definindo a coordenada vertical de início da imagem
+    altura_nome = ALTURA
+    altura_continuar = ALTURA + 100
+    altura_menu = ALTURA + 100
+ 
+    pause = True
+
+    while pause:
+        RELOGIO.tick(FPS)
+        TELA.blit(BG, (0, 0))
+
+        # Atualizações na posição vertical de cada imagem
+        if altura_nome > ALTURA//6:
+            altura_nome -= 40
+        else:
+            if altura_continuar > altura_nome + (ALTURA//3):
+                altura_continuar -= 30
+            else:
+                if altura_menu > altura_continuar + (ALTURA//6):
+                    altura_menu -= 30
+        
+
+        # Colocando imagens na tela
+
+        TELA.blit(TEXTO_PAUSA, (largura_nome, altura_nome))
+        TELA.blit(B_CONTINUAR, (largura_geral, altura_continuar))
+        TELA.blit(B_BACK_MENU, (largura_geral, altura_menu))
+       
+        # Controle de Eventos de Mouse e Teclado
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                pause = False
+                pg.quit()
+                exit()
+
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_ESCAPE:
+                    pause = False
+                    menu_principal()
+
+            if event.type == pg.MOUSEBUTTONDOWN:
+                x = pg.mouse.get_pos()[0]
+                y = pg.mouse.get_pos()[1]
+                if 137 < x < 409 and 270 < y < 306:
+                    pause = False
+                if 137 < x < 417 and 354 < y < 395:
+                    menu_principal()
+        pg.display.flip()
 
 def tela_fim_de_jogo(pontos):
+    # Definindo label da pontuação
     label_pontos = FONT_PRINCIPAL.render(f"Sua Pontuação: {pontos}", True, BRANCO)
 
     # Pegando a largura as imagens usadas na tela
