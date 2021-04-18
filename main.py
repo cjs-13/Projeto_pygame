@@ -42,6 +42,11 @@ B_SAIR = load_img(dir, "sair.png")
 BG_AJUDA = ch_scale(load_img(dir, "BG_ajuda.png").convert(), (LARGURA, ALTURA + 40))
 B_VOLTAR = load_img(dir, "voltar.png")
 
+
+# Tela de pausa
+TEXTO_PAUSA = load_img(dir,"pause.png").convert_alpha()
+B_CONTINUAR = load_img(dir,"continuar.png")
+
 # Tela de fim de jogo
 TEXTO_GAME_OVER = load_img(dir,"TITLE_gameover.png").convert_alpha()
 B_BACK_MENU = load_img(dir,"back_to_main_menu.png")
@@ -593,6 +598,8 @@ def main():
 
                 if event.key == pg.K_k:
                     fase.pular_fase()
+            if event.type == pg.MOUSEBUTTONDOWN:
+                tela_pause()
 
         keys = pg.key.get_pressed()
         if (keys[pg.K_a] or keys[pg.K_LEFT]) and jogador.x - jogador_vel > 0:
