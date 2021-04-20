@@ -66,7 +66,9 @@ HP = list()
 HP.append(ch_scale(load_img(dir, "hp (1).png"), SCALE_LABEL_HP))
 HP.append(ch_scale(load_img(dir, "hp (2).png"), (280, 5)))
 BARRA_INF = ch_scale(load_img(dir, "barra.png"), (LARGURA, 40))
-BG = ch_scale(load_img(dir, "BG.png").convert(), (LARGURA, ALTURA + 40))
+BG = list()
+for i in range(1, 3):
+    BG.append(ch_scale(load_img(dir, f"BG_({i}).png").convert(), (LARGURA, ALTURA + 40)))
 
 # Icone do Jogo
 ICONE = load_img(dir, "windows_icon.png")
@@ -140,6 +142,7 @@ class Nave():
         self.imunity_timer = 0
         self.hp = 1
         self.max_hp = 1
+        self.hp_regen = 1800
         self.lives = 1
         self.ai = 0
         self.aihelper = 0
@@ -153,7 +156,7 @@ class Nave():
         tela.blit(self.nave_img, (int(self.x), int(self.y)))
 
     def fora_tela(self):
-        return self.y <= 0 or self.y >= ALTURA or self.x <= 0 - self.largura() or self.x >= LARGURA + self.largura()
+        return self.y >= ALTURA or self.x <= 0 - self.largura() or self.x >= LARGURA + self.largura()
 
     def atirarinterno(self, arma, lasers):
         if self.cool_down_counter[arma] < 1:
@@ -171,6 +174,9 @@ class Nave():
         if self.imunity_timer > 0:
             self.imunity_timer -= 1
 
+        if self.tipo == "Jogador" and self.hp_regen > 0 and self.hp < self.max_hp:
+            self.hp_regen -= 1
+
 
     def largura(self):
         return self.nave_img.get_width()
@@ -179,6 +185,9 @@ class Nave():
         return self.nave_img.get_height()
 
     def testevida(self, naves):
+        if self.tipo == "Jogador" and self.hp_regen == 0:
+            self.hp += 1
+            self.hp_regen = 1800
         if self.hp < 1 and self.lives < 2:
             naves.remove(self)
             if self.tipo == "Inimigo" and self.fora_tela() is not True:
@@ -348,10 +357,10 @@ class Boss(Nave):
         self.layer = 2
         self.damagetype = 2
         self.ai = ai
-        self.firerate[0] = 90
-        self.firerate[1] = 60
-        self.firerate[2] = 60
-        self.firerate[3] = 90
+        self.firerate[0] = 70
+        self.firerate[1] = 50
+        self.firerate[2] = 50
+        self.firerate[3] = 70
         self.laserhp[0] = 1
         self.laserhp[1] = 1
         self.laserhp[2] = 1
@@ -388,18 +397,21 @@ class Fase():
         self.counteracive = True
         self.wave += 1
 
-    def pular_fase(self):
+    def pular_fase(self, nave):
         self.counter = -1
         self.counter = True
         self.wave = 0
         self.fase += 1
+        self.dificuty += 1
+        nave.lives += 1
+        nave.hp = nave.max_hp
 
     def criar_inimigo(self, x, y, ai, naves):  # cria um inimigo
-        inimigotempo = Inimigo(x, y, ai)
+        inimigotempo = Inimigo(x, y-SCALE_NAVE[1], ai)
         naves.append(inimigotempo)
 
     def direcionar_fase(self,naves):  # testa em qual fase esta e roda ela
-        if self.fase == 0:
+        if self.fase == 0 or 1:
             self.faseid0(naves)
 
     def sem_inimigos(self, naves):  # olha se tem inimigos e reativa o contador
@@ -486,7 +498,6 @@ class Fase():
             self.counteracive = False
 
     def faseid0(self, naves):  # a primeira fase
-
         if self.wave == 0:  # onda 1
             self.wave_id0(naves)
 
@@ -557,7 +568,7 @@ class Fase():
             self.wave_boss(naves)
 
         elif self.wave == 11:
-            self.pular_fase()
+            self.pular_fase(naves[0])
             self.fase = 0
 
 def testa_colisao(obj1, obj2):
@@ -579,7 +590,7 @@ def main():
 
     while jogando:
         RELOGIO.tick(FPS)
-        TELA.blit(BG, (0, 0))
+        TELA.blit(BG[fase.fase], (0, 0))
 
         for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -588,14 +599,14 @@ def main():
                 exit()
                 
             if event.type == pg.MOUSEBUTTONDOWN:
-                tela_pause()
+                tela_pause(fase)
 
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_ESCAPE:
                     jogando = False
                     menu_principal()
                 if event.key == pg.K_p:
-                    tela_pause()
+                    tela_pause(fase)
 
                 if event.key == pg.K_u:
                     fase.criar_inimigo(random.randint(5,450),0,random.randint(0,3), naves)
@@ -604,7 +615,7 @@ def main():
                     jogador.firerateup()
 
                 if event.key == pg.K_k:
-                    fase.pular_fase()
+                    fase.pular_fase(naves[0])
 
         keys = pg.key.get_pressed()
         if (keys[pg.K_a] or keys[pg.K_LEFT]) and jogador.x - jogador_vel > 0:
@@ -627,7 +638,7 @@ def main():
             laser.ColisaoLaser(lasers)
 
         if jogador.hp <= 0 and jogador.lives < 2:
-            tela_fim_de_jogo(jogador.pontos)
+            tela_fim_de_jogo(jogador.pontos, fase)
 
         for nave in naves:
             nave.reduzirtimers()
@@ -761,7 +772,7 @@ def tela_inicial():
     naves_passando = True
     while naves_passando:
         RELOGIO.tick(FPS)
-        TELA.blit(BG, (0, 0))
+        TELA.blit(BG[0], (0, 0))
 
         # Atualizações na posição vertical de cada imagem
         if altura_nome > -500:
@@ -799,7 +810,7 @@ def tela_inicial():
                     menu_principal()
         pg.display.flip()
 
-def tela_pause():
+def tela_pause(fase):
     # Pegando a largura as imagens usadas na tela
     larg_nome = TEXTO_PAUSA.get_width()
     B_CONTINUAR_largura = B_INICIAR.get_width()
@@ -817,7 +828,7 @@ def tela_pause():
 
     while pause:
         RELOGIO.tick(FPS)
-        TELA.blit(BG, (0, 0))
+        TELA.blit(BG[fase.fase], (0, 0))
 
         # Atualizações na posição vertical de cada imagem
         if altura_nome > ALTURA//6:
@@ -857,7 +868,7 @@ def tela_pause():
                     menu_principal()
         pg.display.flip()
 
-def tela_fim_de_jogo(pontos):
+def tela_fim_de_jogo(pontos, fase):
     # Definindo label da pontuação
     label_pontos = FONT_PRINCIPAL.render(f"Sua Pontuação: {pontos}", True, BRANCO)
 
@@ -881,7 +892,7 @@ def tela_fim_de_jogo(pontos):
 
     while the_end:
         RELOGIO.tick(FPS)
-        TELA.blit(BG, (0, 0))
+        TELA.blit(BG[fase.fase], (0, 0))
 
         # Atualizações na posição vertical de cada imagem
         if altura_nome > ALTURA//6:
