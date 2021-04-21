@@ -188,7 +188,7 @@ class Nave():
     def testevida(self, naves):
         if self.tipo == "Jogador" and self.hp_regen == 0:
             self.hp += 1
-            self.hp_regen = 1800
+            self.hp_regen = 900
         if self.hp < 1 and self.lives < 2:
             naves.remove(self)
             if self.tipo == "Inimigo" and self.fora_tela() is not True:
@@ -197,7 +197,6 @@ class Nave():
                     if jogador.tipo == "Jogador":
                         jogador.pontos += 10
                         naves[0] = jogador
-
         elif self.hp < 1 and self.lives > 1:
             self.lives -= 1
             self.hp = self.max_hp
@@ -759,8 +758,6 @@ def main():
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_ESCAPE:
                     menu_principal()
-                # if event.key == pg.K_p and jogador.firerate[0] > 1:
-                    # jogador.firerate[0] -= 1
                 if event.key == pg.K_k:
                     if fase.fase < 2:
                         fase.pular_fase(naves[0])
