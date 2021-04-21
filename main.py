@@ -396,6 +396,7 @@ class Fase():
         self.dificuty = 1
         self.max_dificuty = 3
         self.wave_randomid = [0, 0, 0]
+        self.win = False
 
     def pular_onda(self):
         self.counter = -1
@@ -717,9 +718,14 @@ class Fase():
         elif self.wave == 2:
             self.wave_random(0, naves)
 
+        elif self.wave == 3 and self.counteracive is False:
+            self.sem_inimigos(naves)
+
         elif self.wave == 3:
-            self.pular_fase(naves[0])
-            self.fase = 2
+            self.wave_boss(naves)
+
+        elif self.wave == 4:
+            self.win = True
 
 def testa_colisao(obj1, obj2):
     # obj1 == Laser, obj2 == Nave atingida
@@ -753,6 +759,8 @@ def main():
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_ESCAPE:
                     menu_principal()
+                # if event.key == pg.K_p and jogador.firerate[0] > 1:
+                    # jogador.firerate[0] -= 1
                 if event.key == pg.K_k:
                     if fase.fase < 2:
                         fase.pular_fase(naves[0])
@@ -785,6 +793,9 @@ def main():
             nave.testevida(naves)
             nave.testeai(lasers)
             nave.draw(TELA)
+
+        if fase.win == True:
+            tela_vencedor(jogador.pontos,fase)
 
         TELA.blit(BARRA_INF, (0, ALTURA))
         jogador.draw_hp(TELA)
