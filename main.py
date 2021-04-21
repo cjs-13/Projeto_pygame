@@ -246,7 +246,7 @@ class Nave():
             self.atirarinterno(2, lasers)
 
     def ai3_inimigo(self, lasers):
-        if self.y == 0:
+        if self.y < - SCALE_NAVE[1]:
             self.aihelper = random.randint(0, 1)
         if self.x + self.largura() + 3 > LARGURA:
             self.aihelper = 1
@@ -404,7 +404,7 @@ class Fase():
 
     def pular_fase(self, nave):
         self.counter = -1
-        self.counter = True
+        self.counteracive = True
         self.fase += 1
         self.wave = 0
         if self.dificuty < self.max_dificuty:
