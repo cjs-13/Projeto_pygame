@@ -47,7 +47,8 @@ B_VOLTAR = load_img(dir, "voltar.png")
 TEXTO_PAUSA = load_img(dir,"pause.png").convert_alpha()
 B_CONTINUAR = load_img(dir,"continuar.png")
 
-# Tela de fim de jogo
+# Telas de fim de jogo
+TEXTO_VENCEDOR = load_img(dir,"TITLE_vencedor.png").convert_alpha()
 TEXTO_GAME_OVER = load_img(dir,"TITLE_gameover.png").convert_alpha()
 B_BACK_MENU = load_img(dir,"back_to_main_menu.png")
 B_TRY_AGAIN = load_img(dir,"try_again.png")
@@ -75,7 +76,7 @@ ICONE = load_img(dir, "windows_icon.png")
 
 # ADIÇÃO DE NOME E ICONE À JANELA DO JOGO
 
-pg.display.set_caption("__Invasores do Espaço__")
+pg.display.set_caption("Invasores do Espaço")
 pg.display.set_icon(ICONE)
 
 # DEFINIÇÃO DAS CLASSES
@@ -1068,6 +1069,64 @@ def tela_fim_de_jogo(pontos, fase):
                 if 137 < x < 417 and 324 < y < 366:
                     main()
                 if 137 < x < 417 and 404 < y < 447:
+                    menu_principal()
+        pg.display.flip()
+
+def tela_vencedor(pontos, fase):
+    # Definindo label da pontuação
+    label_pontos = FONT_PRINCIPAL.render(f"Essa foi sua Pontuação: {pontos}", True, BRANCO)
+
+    # Pegando a largura as imagens usadas na tela
+    larg_nome = TEXTO_VENCEDOR.get_width()
+    B_INICIAR_largura = B_INICIAR.get_width()
+    larg_pontos = label_pontos.get_width()
+     
+    # Definindo a coordenada horizontal de início da imagem
+    largura_nome = LARGURA//2 - larg_nome//2
+    largura_geral = LARGURA//2 - B_INICIAR_largura//2
+    largura_pontos = LARGURA//2 - larg_pontos//2
+
+    # Definindo a coordenada vertical de início da imagem
+    altura_nome = ALTURA
+    altura_menu = ALTURA + 100
+    altura_pontos = ALTURA + 100
+ 
+    the_end = True
+
+    while the_end:
+        RELOGIO.tick(FPS)
+        TELA.blit(BG[fase.fase], (0, 0))
+
+        # Atualizações na posição vertical de cada imagem
+        if altura_nome > ALTURA//6:
+            altura_nome -= 20
+        else:    
+            if altura_pontos > altura_nome + (ALTURA//4):
+                altura_pontos -= 20
+            else:
+                if altura_menu > altura_pontos + (ALTURA//6):
+                    altura_menu -= 20
+                
+        # Colocando imagens na tela
+
+        TELA.blit(TEXTO_VENCEDOR,(largura_nome, altura_nome))
+        TELA.blit(label_pontos, (largura_pontos, altura_pontos))
+        TELA.blit(B_BACK_MENU, (largura_geral, altura_menu))
+       
+        # Controle de Eventos de Mouse e Teclado
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                the_end = False
+                pg.quit()
+                exit()
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_ESCAPE:
+                    the_end = False
+                    menu_principal()
+            if event.type == pg.MOUSEBUTTONDOWN:
+                x = pg.mouse.get_pos()[0]
+                y = pg.mouse.get_pos()[1]
+                if 137 < x < 417 and 324 < y < 366:
                     menu_principal()
         pg.display.flip()
 
