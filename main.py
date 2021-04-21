@@ -787,7 +787,6 @@ def main():
 
         TELA.blit(BARRA_INF, (0, ALTURA))
         jogador.draw_hp(TELA)
-        print(fase.fase)
         fase.direcionar_fase(naves)
         fase.counter_tick()
 
