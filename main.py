@@ -751,7 +751,7 @@ def main():
 
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_ESCAPE:
-                    tela_pause(fase)
+                    menu_principal()
                 if event.key == pg.K_k:
                     if fase.fase < 2:
                         fase.pular_fase(naves[0])
