@@ -79,8 +79,6 @@ def main():
         fase.direcionar_fase(naves)
         fase.counter_tick()
 
-        tests.test_moviment(jogador)
-
         ini.pg.display.flip()
 
 # INICIALIZANDO A APLICAÇÃO
