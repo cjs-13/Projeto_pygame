@@ -5,6 +5,7 @@ from physics import testa_colisao
 
 # DEFINIÇÃO DAS CLASSES
 
+
 class Laser():
     def __init__(self, x, y, img, nave, arma):
         self.x = x + nave.arma_x[arma]
@@ -30,7 +31,7 @@ class Laser():
     def altura(self):
         return self.img.get_height()
 
-    def moverlaserinterno(self, lasers):
+    def moverlaserinterno(self):
         self.x += self.vel_x
         self.y += self.vel_y
         if self.fora_tela():
@@ -44,7 +45,7 @@ class Laser():
                     nave.hp -= 1
                     nave.imunity_timer = 5
 
-    def ColisaoLaser(self, lasers):
+    def colisaoLaser(self, lasers):
         for laser in lasers:
             if self.damagetype != laser.damagetype and testa_colisao(self, laser):
                 self.hp -= 1
@@ -206,6 +207,8 @@ class Nave():
 class Jogador(Nave):
     def __init__(self, x, y):
         super().__init__(x, y)
+        self.vel_x = 5
+        self.vel_y = 5
         self.nave_img = asc.NAVE_PRINCIPAL
         self.laser_img = asc.LASER_PRINCIPAL
         self.hp_img = asc.HP
@@ -242,6 +245,21 @@ class Jogador(Nave):
         tela.blit(hp_label, (7, ini.ALTURA + 11))
         tela.blit(lives_label, (ini.SCALE_LABEL_HP[0] + 60, ini.ALTURA + 11))
         tela.blit(pontos, (ini.SCALE_LABEL_HP[0] + 140, ini.ALTURA + 11))
+
+
+    def move_left(self):
+        self.x -= self.vel_x
+
+
+    def move_right(self):
+        self.x += self.vel_x
+
+
+    def move_up(self):
+        self.y -= self.vel_y
+
+    def move_down(self):
+        self.y += self.vel_y
 
 
 class Inimigo(Nave):
