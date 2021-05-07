@@ -22,9 +22,10 @@ def test_collision_laser():
 def test_no_collision():
     assert physics.testa_colisao(obj1, obj4) == False
 
+# As duas linhas a baixo foram comentadas por que estavam impedindo a execução do jogo. 
 
-testtimer = [0, 0, 0, 0, 4]
-testejogador = css.Jogador(ini.LARGURA//2 - asc.NAVE_PRINCIPAL.get_width()/2, ini.ALTURA - 100)
+#testtimer = [0, 0, 0, 0, 4]
+#testejogador = css.Jogador(ini.LARGURA//2 - asc.NAVE_PRINCIPAL.get_width()/2, ini.ALTURA - 100)
 
 
 def test_moviment_left(direction, testejogador):
