@@ -3,9 +3,6 @@ import assets as asc
 import random
 from physics import testa_colisao
 
-# DEFINIÇÃO DAS CLASSES
-
-
 class Laser():
     def __init__(self, x, y, img, nave, arma):
         self.x = x + nave.arma_x[arma]
@@ -186,7 +183,7 @@ class Nave():
             self.hp = 0
 
     def ai4_boss(self, lasers):
-        if self.y + 2 < 10:  # Animacao de entrada
+        if self.y + 2 < 10:
             self.y += 2
         else:
             if self.x + self.largura() + 0.5 > ini.LARGURA:
@@ -228,7 +225,7 @@ class Jogador(Nave):
         self.arma_x[0] = 45
         self.arma_y[0] = 0
 
-    def colisao(self, naves):  # Testa a colisao do player com as naves
+    def colisao(self, naves):
         for nave in naves:
             if self.layer != nave.layer and testa_colisao(self, nave):
                 nave.hp -= 1
@@ -236,7 +233,7 @@ class Jogador(Nave):
                     self.hp -= 1
                     self.imunity_timer = 5
 
-    def draw_hp(self, tela):  # Desenha na tela os status de hp e vida do jogador
+    def draw_hp(self, tela):
         hp_label = ini.FONT_PRINCIPAL.render("HP:", True, ini.BRANCO)
         lives_label = ini.FONT_PRINCIPAL.render(f"Vidas: {self.lives - 1}", True, ini.BRANCO)
         pontos = ini.FONT_PRINCIPAL.render(f"Pontos: {self.pontos}", True, ini.BRANCO)
@@ -357,11 +354,11 @@ class Fase():
             nave.lives += 1
             nave.hp = nave.max_hp
 
-    def criar_inimigo(self, x, y, ai, naves):  # cria um inimigo
+    def criar_inimigo(self, x, y, ai, naves):
         inimigotempo = Inimigo(x, y - ini.SCALE_NAVE[1], ai)
         naves.append(inimigotempo)
 
-    def direcionar_fase(self, naves):  # testa em qual fase esta e roda ela
+    def direcionar_fase(self, naves):
         if self.fase == 0:
             self.faseid0(naves)
         if self.fase == 1:
@@ -369,12 +366,12 @@ class Fase():
         if self.fase == 2:
             self.faseid2(naves)
 
-    def sem_inimigos(self, naves):  # olha se tem inimigos e reativa o contador
+    def sem_inimigos(self, naves):
         if len(naves) < 2:
             self.counteracive = True
 
     def counter_tick(self):
-        if self.counteracive:  # anda o contador se ele estiver ativo
+        if self.counteracive:
             self.counter += 1
 
     def wave_random(self, type, naves):
@@ -389,30 +386,30 @@ class Fase():
         elif self.wave_randomid[type] == 4:
             self.wave_id4(naves)
 
-    def wave_id0(self, naves):  # onda de id 0, spawna inimigos e uma formação de / \
+    def wave_id0(self, naves):
         if self.counter % (120 / self.dificuty) != 0:
             self.counteracive = True
-        elif self.counter == 0:  # spawna inimigos quando o counter e igual a 0
+        elif self.counter == 0:
             self.criar_inimigo(5, 0, 0, naves)
             self.criar_inimigo(450, 0, 0, naves)
-        elif self.counter == 240 / self.dificuty:  # spawna inimigos quando o counter e igual a 120 na dificuldade 1
+        elif self.counter == 240 / self.dificuty:
             self.criar_inimigo(65, 0, 0, naves)
             self.criar_inimigo(390, 0, 0, naves)
-        elif self.counter == 360 / self.dificuty:  # spawna inimigos quando o counter e igual a 240 na dificuldade 1
+        elif self.counter == 360 / self.dificuty:
             self.criar_inimigo(125, 0, 0, naves)
             self.criar_inimigo(330, 0, 0, naves)
-        elif self.counter == 480 / self.dificuty:  # spawna inimigos quando o counter e igual a 360 na dificuldade 1
+        elif self.counter == 480 / self.dificuty:
             self.criar_inimigo(185, 0, 0, naves)
             self.criar_inimigo(270, 0, 0, naves)
-        elif self.counter == 600 / self.dificuty:  # termina a onda quando o counter e igual a 480 na dificuldade 1
-            self.counter = -1  # reseta o contador
-            self.wave += 1  # anda para a proxima onda
-            self.counteracive = False  # desativa o contador
+        elif self.counter == 600 / self.dificuty:
+            self.counter = -1 
+            self.wave += 1
+            self.counteracive = False
 
-    def wave_id1(self, naves):  # onda de id 1, spawna inimigos em formação de ---
+    def wave_id1(self, naves):
         if self.counter % (120 / self.dificuty) != 0:
             self.counteracive = True
-        elif self.counter == 0:  # spawna a linha de inimigos simples
+        elif self.counter == 0:
             self.criar_inimigo(5, 0, 0, naves)
             self.criar_inimigo(105, 0, 0, naves)
             self.criar_inimigo(205, 0, 0, naves)
@@ -420,29 +417,29 @@ class Fase():
             self.criar_inimigo(350, 0, 0, naves)
             self.criar_inimigo(450, 0, 0, naves)
         elif self.counter == 240 / self.dificuty:
-            self.counter = -1  # reseta o contador
-            self.wave += 1  # anda para a proxima onda
-            self.counteracive = False  # desativa o contador
+            self.counter = -1
+            self.wave += 1 
+            self.counteracive = False
 
     def wave_id2(self, naves):
         if self.counter % (120 / self.dificuty) != 0:
             self.counteracive = True
-        elif self.counter == 0:  # spawna inimigos quando o counter e igual a 0
+        elif self.counter == 0:
             self.criar_inimigo(5, 0, 1, naves)
             self.criar_inimigo(450, 0, 1, naves)
-        elif self.counter == 240 / self.dificuty:  # spawna inimigos quando o counter e igual a 120 na dificuldade 1
+        elif self.counter == 240 / self.dificuty:
             self.criar_inimigo(5, 0, 1, naves)
             self.criar_inimigo(450, 0, 1, naves)
-        elif self.counter == 360 / self.dificuty:  # spawna inimigos quando o counter e igual a 240 na dificuldade 1
+        elif self.counter == 360 / self.dificuty:
             self.criar_inimigo(5, 0, 1, naves)
             self.criar_inimigo(450, 0, 1, naves)
-        elif self.counter == 480 / self.dificuty:  # spawna inimigos quando o counter e igual a 360 na dificuldade 1
+        elif self.counter == 480 / self.dificuty:
             self.criar_inimigo(5, 0, 1, naves)
             self.criar_inimigo(450, 0, 1, naves)
-        elif self.counter == 600 / self.dificuty:  # termina a onda quando o counter e igual a 480 na dificuldade 1
-            self.counter = -1  # reseta o contador
-            self.wave += 1  # anda para a proxima onda
-            self.counteracive = False  # desativa o contador
+        elif self.counter == 600 / self.dificuty:
+            self.counter = -1
+            self.wave += 1
+            self.counteracive = False
 
     def wave_id3(self, naves):
         if self.counter % (120 / self.dificuty) != 0:
@@ -468,7 +465,7 @@ class Fase():
             self.wave += 1
             self.counteracive = False
 
-    def wave_boss(self, naves):  # Spawna nave do boss hp multiplicado pela dificudade da fase
+    def wave_boss(self, naves):
         if self.counter % (120 / self.dificuty) != 0:
             self.counteracive = True
         elif self.counter == 0:
@@ -480,14 +477,14 @@ class Fase():
             self.wave += 1
             self.counteracive = False
 
-    def faseid0(self, naves):  # a primeira fase
-        if self.wave == 0:  # onda 1
+    def faseid0(self, naves):
+        if self.wave == 0:
             self.wave_id0(naves)
 
-        elif self.wave == 1 and self.counteracive is False:  # testa se ainda tem inimigos antes de avançar as ondas
+        elif self.wave == 1 and self.counteracive is False:
             self.sem_inimigos(naves)
 
-        elif self.wave == 1:  # onda 2
+        elif self.wave == 1:
             self.wave_id1(naves)
 
         elif self.wave == 2 and self.counteracive is False:
@@ -553,8 +550,8 @@ class Fase():
         elif self.wave == 11:
             self.pular_fase(naves[0])
 
-    def faseid1(self, naves):  # segunda fase
-        if self.wave == 0:  # onda 1
+    def faseid1(self, naves):
+        if self.wave == 0:
             self.wave_id3(naves)
 
         elif self.wave == 1 and self.counteracive is False:

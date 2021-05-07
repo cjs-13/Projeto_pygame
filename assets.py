@@ -1,16 +1,11 @@
 import initialize as ini
 import os
 
-# FUNÇÕES PARA TORNAR O CÓDIGO MENOS VERBOSO
-
 def load_img(caminho, nome_imagem):
     return ini.pg.image.load(os.path.join(caminho, nome_imagem))
 
-
 def ch_scale(imagem, escala):
     return ini.pg.transform.scale(imagem, escala)
-
-
 
 # CARREGANDO IMAGENS
 

@@ -4,13 +4,10 @@ import classes as css
 import screens
 from sys import exit
 
-# ADIÇÃO DE NOME E ICONE À JANELA DO JOGO
 import tests
 
 ini.pg.display.set_caption("Invasores do Espaço")
 ini.pg.display.set_icon(asc.ICONE)
-
-# JANELAS DO JOGO
 
 
 def main():
@@ -80,8 +77,5 @@ def main():
         fase.counter_tick()
 
         ini.pg.display.flip()
-
-# INICIALIZANDO A APLICAÇÃO
-
 
 screens.tela_inicial(main)

@@ -2,13 +2,10 @@ import initialize as ini
 import assets as asc
 
 def menu_principal(main):
-    # Pegando a largura as imagens usadas na tela
     B_INICIAR_largura = asc.B_INICIAR.get_width()
 
-    # Definindo a coordenada horizontal de início da imagem
     largura_geral = ini.LARGURA // 2 - B_INICIAR_largura // 2
 
-    # Definindo a coordenada vertical de início da imagem
     altura_iniciar = ini.ALTURA + 100
     altura_ajuda = ini.ALTURA + 100
     altura_sair = ini.ALTURA + 100
@@ -19,7 +16,6 @@ def menu_principal(main):
         ini.RELOGIO.tick(ini.FPS)
         ini.TELA.blit(asc.BG_INICIO, (0, 0))
 
-        # Atualizações na posição vertical de cada imagem
         if altura_iniciar > ini.ALTURA // 2.5:
             altura_iniciar -= 14
         else:
@@ -29,12 +25,10 @@ def menu_principal(main):
                 if altura_sair > altura_ajuda + (ini.ALTURA // 5):
                     altura_sair -= 14
 
-        # Colocando imagens na tela
         ini.TELA.blit(asc.B_INICIAR, (largura_geral, altura_iniciar))
         ini.TELA.blit(asc.B_AJUDA, (largura_geral, altura_ajuda))
         ini.TELA.blit(asc.B_SAIR, (largura_geral, altura_sair))
 
-        # Controle de Eventos de Mouse e Teclado
         for event in ini.pg.event.get():
             if event.type == ini.pg.QUIT:
                 menu = False
@@ -55,13 +49,10 @@ def menu_principal(main):
 
 
 def ajuda(main):
-    # Pegando a largura as imagens usadas na tela
     B_VOLTAR_largura = asc.B_VOLTAR.get_width()
 
-    # Definindo a coordenada horizontal de início da imagem
     largura = ini.LARGURA // 2 - B_VOLTAR_largura // 2
 
-    # Definindo a coordenada vertical de início da imagem
     altura_voltar = ini.ALTURA
 
     ajuda = True
@@ -69,14 +60,11 @@ def ajuda(main):
         ini.RELOGIO.tick(ini.FPS)
         ini.TELA.blit(asc.BG_AJUDA, (0, 0))
 
-        # Atualizações na posição vertical de cada imagem
         if altura_voltar > ini.ALTURA // 1.15:
             altura_voltar -= 4
 
-        # Colocando imagem na tela
         ini.TELA.blit(asc.B_VOLTAR, (largura, altura_voltar))
 
-        # Controle de Eventos de Mouse e Teclado
         for event in ini.pg.event.get():
             if event.type == ini.pg.QUIT:
                 ini.pg.quit()
@@ -84,7 +72,7 @@ def ajuda(main):
             if event.type == ini.pg.KEYDOWN:
                 if event.key == ini.pg.K_ESCAPE:
                     ajuda = False
-            if event.type == ini.pg.MOUSEBUTTONDOWN:  # Monitora clique do mouse
+            if event.type == ini.pg.MOUSEBUTTONDOWN:
                 x = ini.pg.mouse.get_pos()[0]
                 y = ini.pg.mouse.get_pos()[1]
                 if 123 < x < 414 and 515 < y < 552:
@@ -93,12 +81,10 @@ def ajuda(main):
 
 
 def tela_inicial(main):
-    # Pegando a largura as imagens usadas na tela
     larg_nome = asc.TEXTO.get_width()
     larg_nave_p = asc.NAVE_PRINCIPAL.get_width()
     larg_nave_boss = asc.NAVES_INIMIGAS[4].get_width()
 
-    # Definindo a coordenada horizontal de início de cada imagem
     largura_nome = ini.LARGURA // 2 - larg_nome // 2
     largura_nave = ini.LARGURA // 2 - larg_nave_p // 2
     largura_nave_i1 = ini.LARGURA // 1.5
@@ -106,7 +92,6 @@ def tela_inicial(main):
     largura_nave_i3 = ini.LARGURA // 2 - larg_nave_p // 2
     largura_boss = ini.LARGURA // 2 - larg_nave_boss // 2
 
-    # Definindo a coordenada vertical de início de cada imagem
     altura_nome = ini.ALTURA
     altura_nave_p = ini.ALTURA + 300
     altura_nave_i1 = ini.ALTURA + 350
@@ -122,7 +107,6 @@ def tela_inicial(main):
         ini.RELOGIO.tick(ini.FPS)
         ini.TELA.blit(asc.BG[0], (0, 0))
 
-        # Atualizações na posição vertical de cada imagem
         if altura_nome > -500:
             altura_nome -= 7
         if altura_nave_p > -90:
@@ -139,7 +123,6 @@ def tela_inicial(main):
             naves_passando = False
             menu_principal(main)
 
-        # Colocando imagens na tela
         ini.TELA.blit(asc.TEXTO, (largura_nome, altura_nome))
         ini.TELA.blit(asc.NAVE_PRINCIPAL, (largura_nave, altura_nave_p))
         ini.TELA.blit(girar(asc.NAVES_INIMIGAS[0]), (int(largura_nave_i1), int(altura_nave_i1)))
@@ -147,7 +130,6 @@ def tela_inicial(main):
         ini.TELA.blit(girar(asc.NAVES_INIMIGAS[2]), (largura_nave_i3, altura_nave_i3))
         ini.TELA.blit(girar(asc.NAVES_INIMIGAS[4]), (largura_boss, altura_nave_b))
 
-        # Controle de Eventos de Mouse e Teclado
         for event in ini.pg.event.get():
             if event.type == ini.pg.QUIT:
                 naves_passando = False
@@ -160,15 +142,12 @@ def tela_inicial(main):
 
 
 def tela_pause(fase,main):
-    # Pegando a largura as imagens usadas na tela
     larg_nome = asc.TEXTO_PAUSA.get_width()
     B_CONTINUAR_largura = asc.B_INICIAR.get_width()
 
-    # Definindo a coordenada horizontal de início da imagem
     largura_nome = ini.LARGURA // 2 - larg_nome // 2
     largura_geral = ini.LARGURA // 2 - B_CONTINUAR_largura // 2
 
-    # Definindo a coordenada vertical de início da imagem
     altura_nome = ini.ALTURA
     altura_continuar = ini.ALTURA + 100
     altura_menu = ini.ALTURA + 100
@@ -179,7 +158,6 @@ def tela_pause(fase,main):
         ini.RELOGIO.tick(ini.FPS)
         ini.TELA.blit(asc.BG[fase.fase], (0, 0))
 
-        # Atualizações na posição vertical de cada imagem
         if altura_nome > ini.ALTURA // 6:
             altura_nome -= 40
         else:
@@ -189,13 +167,10 @@ def tela_pause(fase,main):
                 if altura_menu > altura_continuar + (ini.ALTURA // 6):
                     altura_menu -= 30
 
-        # Colocando imagens na tela
-
         ini.TELA.blit(asc.TEXTO_PAUSA, (largura_nome, altura_nome))
         ini.TELA.blit(asc.B_CONTINUAR, (largura_geral, altura_continuar))
         ini.TELA.blit(asc.B_BACK_MENU, (largura_geral, altura_menu))
 
-        # Controle de Eventos de Mouse e Teclado
         for event in ini.pg.event.get():
             if event.type == ini.pg.QUIT:
                 pause = False
@@ -218,20 +193,16 @@ def tela_pause(fase,main):
 
 
 def tela_fim_de_jogo(pontos, fase, main):
-    # Definindo label da pontuação
     label_pontos = ini.FONT_PRINCIPAL.render(f"Sua Pontuação: {pontos}", True, ini.BRANCO)
 
-    # Pegando a largura as imagens usadas na tela
     larg_nome = asc.TEXTO_GAME_OVER.get_width()
     B_INICIAR_largura = asc.B_INICIAR.get_width()
     larg_pontos = label_pontos.get_width()
 
-    # Definindo a coordenada horizontal de início da imagem
     largura_nome = ini.LARGURA // 2 - larg_nome // 2
     largura_geral = ini.LARGURA // 2 - B_INICIAR_largura // 2
     largura_pontos = ini.LARGURA // 2 - larg_pontos // 2
 
-    # Definindo a coordenada vertical de início da imagem
     altura_nome = ini.ALTURA
     altura_try_again = ini.ALTURA + 100
     altura_menu = ini.ALTURA + 100
@@ -243,7 +214,6 @@ def tela_fim_de_jogo(pontos, fase, main):
         ini.RELOGIO.tick(ini.FPS)
         ini.TELA.blit(asc.BG[fase.fase], (0, 0))
 
-        # Atualizações na posição vertical de cada imagem
         if altura_nome > ini.ALTURA // 6:
             altura_nome -= 20
         else:
@@ -256,14 +226,11 @@ def tela_fim_de_jogo(pontos, fase, main):
                     if altura_menu > altura_try_again + (ini.ALTURA // 6):
                         altura_menu -= 20
 
-        # Colocando imagens na tela
-
         ini.TELA.blit(asc.TEXTO_GAME_OVER, (largura_nome, altura_nome))
         ini.TELA.blit(label_pontos, (largura_pontos, altura_pontos))
         ini.TELA.blit(asc.B_TRY_AGAIN, (largura_geral, altura_try_again))
         ini.TELA.blit(asc.B_BACK_MENU, (largura_geral, altura_menu))
 
-        # Controle de Eventos de Mouse e Teclado
         for event in ini.pg.event.get():
             if event.type == ini.pg.QUIT:
                 the_end = False
@@ -284,20 +251,16 @@ def tela_fim_de_jogo(pontos, fase, main):
 
 
 def tela_vencedor(pontos, fase, main):
-    # Definindo label da pontuação
     label_pontos = ini.FONT_PRINCIPAL.render(f"Essa foi sua Pontuação: {pontos}", True, ini.BRANCO)
 
-    # Pegando a largura as imagens usadas na tela
     larg_nome = asc.TEXTO_VENCEDOR.get_width()
     B_INICIAR_largura = asc.B_INICIAR.get_width()
     larg_pontos = label_pontos.get_width()
 
-    # Definindo a coordenada horizontal de início da imagem
     largura_nome = ini.LARGURA // 2 - larg_nome // 2
     largura_geral = ini.LARGURA // 2 - B_INICIAR_largura // 2
     largura_pontos = ini.LARGURA // 2 - larg_pontos // 2
 
-    # Definindo a coordenada vertical de início da imagem
     altura_nome = ini.ALTURA
     altura_menu = ini.ALTURA + 100
     altura_pontos = ini.ALTURA + 100
@@ -308,7 +271,6 @@ def tela_vencedor(pontos, fase, main):
         ini.RELOGIO.tick(ini.FPS)
         ini.TELA.blit(asc.BG[fase.fase], (0, 0))
 
-        # Atualizações na posição vertical de cada imagem
         if altura_nome > ini.ALTURA // 6:
             altura_nome -= 20
         else:
@@ -318,13 +280,10 @@ def tela_vencedor(pontos, fase, main):
                 if altura_menu > altura_pontos + (ini.ALTURA // 6):
                     altura_menu -= 20
 
-        # Colocando imagens na tela
-
         ini.TELA.blit(asc.TEXTO_VENCEDOR, (largura_nome, altura_nome))
         ini.TELA.blit(label_pontos, (largura_pontos, altura_pontos))
         ini.TELA.blit(asc.B_BACK_MENU, (largura_geral, altura_menu))
 
-        # Controle de Eventos de Mouse e Teclado
         for event in ini.pg.event.get():
             if event.type == ini.pg.QUIT:
                 the_end = False
