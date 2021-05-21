@@ -1,4 +1,9 @@
 # Projeto_pygame
+## Contribuidores
+Elikyel: https://github.com/Elikyel
+Lucas: https://github.com/lucaslemo
+E eu(Jonas): https://github.com/cjs-13
+
 ## Sobre o Projeto
 Projeto proposto na disciplina de Laboratório de Programação no ano de 2021, para obtenção de pontuação na mesma.
 
